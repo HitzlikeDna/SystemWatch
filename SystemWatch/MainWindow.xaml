@@ -2,18 +2,29 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-        Title="SystemWatch" Width="700" Height="600"
+        Title="SystemWatch" Width="900" Height="700"
         Loaded="MainWindow_Loaded"
         Closing="MainWindow_Closing">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <!-- 0: Controls -->
             <RowDefinition Height="Auto"/>
+            <!-- 1: CPU Text -->
             <RowDefinition Height="Auto"/>
+            <!-- 2: RAM Text -->
             <RowDefinition Height="Auto"/>
+            <!-- 3: Net Text -->
+            <RowDefinition Height="Auto"/>
+            <!-- 4: Disk Text -->
             <RowDefinition Height="*"/>
+            <!-- 5: CPU Chart -->
             <RowDefinition Height="*"/>
+            <!-- 6: RAM Chart -->
             <RowDefinition Height="*"/>
+            <!-- 7: Net Chart -->
+            <RowDefinition Height="*"/>
+            <!-- 8: Disk Chart -->
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Vertical" HorizontalAlignment="Center" Margin="0,0,0,12">
@@ -59,13 +70,54 @@
             <TextBlock Text="Netz: " FontSize="18" Margin="0,0,8,0"/>
             <TextBlock x:Name="NetText" FontSize="18" FontWeight="Bold" Margin="0,0,16,0"/>
             <TextBlock Text="Adapter: " VerticalAlignment="Center" Margin="0,0,4,0"/>
-            <ComboBox x:Name="AdapterCombo" Width="220" SelectionChanged="AdapterCombo_SelectionChanged"/>
+            <ComboBox x:Name="AdapterCombo" Width="260" SelectionChanged="AdapterCombo_SelectionChanged"/>
         </StackPanel>
 
-        <lvc:CartesianChart x:Name="CpuChart" Grid.Row="4" Margin="0,12,0,0"/>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Text="Disk: " FontSize="18" Margin="0,0,8,0"/>
+            <TextBlock x:Name="DiskText" FontSize="18" FontWeight="Bold" Margin="0,0,16,0"/>
+            <TextBlock Text="Laufwerk: " VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <ComboBox x:Name="DriveCombo" Width="80" SelectionChanged="DriveCombo_SelectionChanged"/>
+        </StackPanel>
 
-        <lvc:CartesianChart x:Name="RamChart" Grid.Row="5" Margin="0,12,0,0"/>
+        <!-- CPU Chart Row -->
+        <Grid Grid.Row="5" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="CPU Verlauf:" VerticalAlignment="Top" Margin="0,0,12,0" />
+            <lvc:CartesianChart x:Name="CpuChart" Grid.Column="1" />
+        </Grid>
 
-        <lvc:CartesianChart x:Name="NetChart" Grid.Row="6" Margin="0,12,0,0"/>
+        <!-- RAM Chart Row -->
+        <Grid Grid.Row="6" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="RAM Verlauf:" VerticalAlignment="Top" Margin="0,0,12,0" />
+            <lvc:CartesianChart x:Name="RamChart" Grid.Column="1" />
+        </Grid>
+
+        <!-- Network Chart Row -->
+        <Grid Grid.Row="7" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Netz Verlauf:" VerticalAlignment="Top" Margin="0,0,12,0" />
+            <lvc:CartesianChart x:Name="NetChart" Grid.Column="1" />
+        </Grid>
+
+        <!-- Disk Chart Row -->
+        <Grid Grid.Row="8" Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Disk Verlauf:" VerticalAlignment="Top" Margin="0,0,12,0" />
+            <lvc:CartesianChart x:Name="DiskChart" Grid.Column="1" />
+        </Grid>
     </Grid>
 </Window>

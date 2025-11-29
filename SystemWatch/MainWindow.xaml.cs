@@ -3,6 +3,7 @@ using LiveCharts.Wpf;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -23,12 +24,15 @@ namespace SystemWatch
         private readonly PerformanceCounter _ramAvailableCounter;
         private PerformanceCounter _netSentCounter;
         private PerformanceCounter _netReceivedCounter;
+        private PerformanceCounter _diskBytesCounter;
         private readonly ulong _totalRamBytes;
 
         private readonly ChartValues<double> _cpuValues = new ChartValues<double>();
         private readonly ChartValues<double> _ramValues = new ChartValues<double>();
         private readonly ChartValues<double> _netValues = new ChartValues<double>();
+        private readonly ChartValues<double> _diskValues = new ChartValues<double>();
         private int _historyLength = 60;
+        private string _currentDrive = "C:\\";
 
         public MainWindow()
         {
@@ -119,6 +123,27 @@ namespace SystemWatch
             };
         }
 
+        private void InitDiskChart()
+        {
+            if (DiskChart == null)
+                return;
+
+            _diskValues.Clear();
+            for (int i = 0; i < _historyLength; i++)
+                _diskValues.Add(0);
+
+            DiskChart.Series = new SeriesCollection
+            {
+                new LineSeries
+                {
+                    Title = "Disk MB/s",
+                    Values = _diskValues,
+                    PointGeometry = null,
+                    LineSmoothness = 0
+                }
+            };
+        }
+
         private void InitAdapters()
         {
             var category = new PerformanceCounterCategory("Network Interface");
@@ -149,6 +174,44 @@ namespace SystemWatch
 
             if (AdapterCombo.Items.Count > 0)
                 AdapterCombo.SelectedIndex = 0;
+
+            InitDiskCounter();
+        }
+
+        private void InitDiskCounter()
+        {
+            try
+            {
+                var category = new PerformanceCounterCategory("PhysicalDisk");
+                string[] instances = category.GetInstanceNames();
+                string name = instances.FirstOrDefault(n => n == "_Total") ?? instances.FirstOrDefault() ?? "";
+                if (!string.IsNullOrEmpty(name))
+                {
+                    _diskBytesCounter = new PerformanceCounter("PhysicalDisk", "Disk Bytes/sec", name);
+                    _ = _diskBytesCounter.NextValue();
+                }
+            }
+            catch
+            {
+                _diskBytesCounter = null;
+            }
+        }
+
+        private void InitDrives()
+        {
+            DriveCombo.Items.Clear();
+
+            foreach (var drive in DriveInfo.GetDrives())
+            {
+                if (drive.DriveType == DriveType.Fixed && drive.IsReady)
+                {
+                    var item = new ComboBoxItem { Content = drive.Name, Tag = drive.Name };
+                    DriveCombo.Items.Add(item);
+                }
+            }
+
+            if (DriveCombo.Items.Count > 0)
+                DriveCombo.SelectedIndex = 0;
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -176,9 +239,38 @@ namespace SystemWatch
                 NetText.Text = "kein Adapter";
             }
 
+            double diskMBps = 0;
+            if (_diskBytesCounter != null)
+            {
+                double bytes = _diskBytesCounter.NextValue();
+                diskMBps = bytes / (1024.0 * 1024.0);
+            }
+
+            try
+            {
+                var drive = new DriveInfo(_currentDrive);
+                if (drive.IsReady)
+                {
+                    double totalGB = drive.TotalSize / (1024.0 * 1024.0 * 1024.0);
+                    double freeGB = drive.AvailableFreeSpace / (1024.0 * 1024.0 * 1024.0);
+                    double usedGB = totalGB - freeGB;
+                    double usedDiskPercent = (usedGB / totalGB) * 100.0;
+                    DiskText.Text = $"{_currentDrive} {freeGB:0.0} GB frei / {totalGB:0.0} GB ({usedDiskPercent:0.0} % genutzt), IO {diskMBps:0.00} MB/s";
+                }
+                else
+                {
+                    DiskText.Text = $"{_currentDrive} nicht bereit, IO {diskMBps:0.00} MB/s";
+                }
+            }
+            catch
+            {
+                DiskText.Text = $"{_currentDrive} Fehler, IO {diskMBps:0.00} MB/s";
+            }
+
             AppendValue(_cpuValues, cpuUsage);
             AppendValue(_ramValues, usedPercent);
             AppendValue(_netValues, kBps);
+            AppendValue(_diskValues, diskMBps);
         }
 
         private void AppendValue(ChartValues<double> values, double newValue)
@@ -239,6 +331,7 @@ namespace SystemWatch
                 InitCpuChart();
                 InitRamChart();
                 InitNetChart();
+                InitDiskChart();
             }
         }
 
@@ -263,9 +356,19 @@ namespace SystemWatch
             }
         }
 
+        private void DriveCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DriveCombo.SelectedItem is ComboBoxItem item &&
+                item.Tag is string name &&
+                !string.IsNullOrWhiteSpace(name))
+            {
+                _currentDrive = name;
+            }
+        }
+
         private void ThemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (CpuChart == null || RamChart == null || NetChart == null)
+            if (CpuChart == null || RamChart == null || NetChart == null || DiskChart == null)
                 return;
 
             if (ThemeCombo.SelectedItem is ComboBoxItem item &&
@@ -278,6 +381,7 @@ namespace SystemWatch
                     CpuChart.Background = Brushes.Black;
                     RamChart.Background = Brushes.Black;
                     NetChart.Background = Brushes.Black;
+                    DiskChart.Background = Brushes.Black;
                 }
                 else
                 {
@@ -286,10 +390,10 @@ namespace SystemWatch
                     CpuChart.Background = SystemColors.WindowBrush;
                     RamChart.Background = SystemColors.WindowBrush;
                     NetChart.Background = SystemColors.WindowBrush;
+                    DiskChart.Background = SystemColors.WindowBrush;
                 }
             }
         }
-
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -335,7 +439,9 @@ namespace SystemWatch
                 InitCpuChart();
                 InitRamChart();
                 InitNetChart();
+                InitDiskChart();
                 InitAdapters();
+                InitDrives();
                 _timer.Start();
             }), DispatcherPriority.Loaded);
         }
