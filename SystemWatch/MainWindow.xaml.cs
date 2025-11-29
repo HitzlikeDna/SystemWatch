@@ -26,6 +26,7 @@ namespace SystemWatch
         private readonly ChartValues<double> _diskValues = new ChartValues<double>();
         private int _historyLength = 60;
 
+
         public MainWindow()
         {
             InitializeComponent();
@@ -342,6 +343,7 @@ namespace SystemWatch
                             WindowState = WindowState.Normal;
                     }
                 }
+                ThemeCombo.SelectedIndex = 1;
             }
 
             using (var runKey = Registry.CurrentUser.OpenSubKey(RunRegKeyPath))
