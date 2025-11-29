@@ -2,6 +2,7 @@
 using LiveCharts.Wpf;
 using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -25,12 +26,14 @@ namespace SystemWatch
         private PerformanceCounter _netSentCounter;
         private PerformanceCounter _netReceivedCounter;
         private PerformanceCounter _diskBytesCounter;
+        private PerformanceCounter[] _gpuCounters;
         private readonly ulong _totalRamBytes;
 
         private readonly ChartValues<double> _cpuValues = new ChartValues<double>();
         private readonly ChartValues<double> _ramValues = new ChartValues<double>();
         private readonly ChartValues<double> _netValues = new ChartValues<double>();
         private readonly ChartValues<double> _diskValues = new ChartValues<double>();
+        private readonly ChartValues<double> _gpuValues = new ChartValues<double>();
         private int _historyLength = 60;
         private string _currentDrive = "C:\\";
 
@@ -99,6 +102,32 @@ namespace SystemWatch
             RamChart.AxisY = new AxesCollection
             {
                 new Axis { MinValue = 0, MaxValue = 100, Title = "RAM %" }
+            };
+        }
+
+        private void InitGpuChart()
+        {
+            if (GpuChart == null)
+                return;
+
+            _gpuValues.Clear();
+            for (int i = 0; i < _historyLength; i++)
+                _gpuValues.Add(0);
+
+            GpuChart.Series = new SeriesCollection
+            {
+                new LineSeries
+                {
+                    Title = "GPU %",
+                    Values = _gpuValues,
+                    PointGeometry = null,
+                    LineSmoothness = 0
+                }
+            };
+
+            GpuChart.AxisY = new AxesCollection
+            {
+                new Axis { MinValue = 0, MaxValue = 100, Title = "GPU %" }
             };
         }
 
@@ -176,6 +205,7 @@ namespace SystemWatch
                 AdapterCombo.SelectedIndex = 0;
 
             InitDiskCounter();
+            InitGpuCounters();
         }
 
         private void InitDiskCounter()
@@ -194,6 +224,34 @@ namespace SystemWatch
             catch
             {
                 _diskBytesCounter = null;
+            }
+        }
+
+        private void InitGpuCounters()
+        {
+            try
+            {
+                var category = new PerformanceCounterCategory("GPU Engine");
+                string[] instances = category.GetInstanceNames();
+                var list = new List<PerformanceCounter>();
+                foreach (var inst in instances)
+                {
+                    string lower = inst.ToLower();
+                    if (lower.Contains("engtype_3d"))
+                    {
+                        list.Add(new PerformanceCounter("GPU Engine", "Utilization Percentage", inst));
+                    }
+                }
+                _gpuCounters = list.ToArray();
+                if (_gpuCounters.Length > 0)
+                {
+                    foreach (var c in _gpuCounters)
+                        _ = c.NextValue();
+                }
+            }
+            catch
+            {
+                _gpuCounters = null;
             }
         }
 
@@ -224,6 +282,16 @@ namespace SystemWatch
 
             CpuText.Text = $"{cpuUsage:0.0} %";
             RamText.Text = $"{usedPercent:0.0} %";
+
+            double gpuUsage = 0;
+            if (_gpuCounters != null && _gpuCounters.Length > 0)
+            {
+                foreach (var c in _gpuCounters)
+                    gpuUsage += c.NextValue();
+            }
+            GpuText.Text = _gpuCounters == null || _gpuCounters.Length == 0
+                ? "nicht verfügbar"
+                : $"{gpuUsage:0.0} %";
 
             double kBps = 0;
             if (_netSentCounter != null && _netReceivedCounter != null)
@@ -269,6 +337,7 @@ namespace SystemWatch
 
             AppendValue(_cpuValues, cpuUsage);
             AppendValue(_ramValues, usedPercent);
+            AppendValue(_gpuValues, gpuUsage);
             AppendValue(_netValues, kBps);
             AppendValue(_diskValues, diskMBps);
         }
@@ -330,6 +399,7 @@ namespace SystemWatch
                 _historyLength = len;
                 InitCpuChart();
                 InitRamChart();
+                InitGpuChart();
                 InitNetChart();
                 InitDiskChart();
             }
@@ -368,7 +438,7 @@ namespace SystemWatch
 
         private void ThemeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (CpuChart == null || RamChart == null || NetChart == null || DiskChart == null)
+            if (CpuChart == null || RamChart == null || GpuChart == null || NetChart == null || DiskChart == null)
                 return;
 
             if (ThemeCombo.SelectedItem is ComboBoxItem item &&
@@ -380,6 +450,7 @@ namespace SystemWatch
                     Foreground = Brushes.White;
                     CpuChart.Background = Brushes.Black;
                     RamChart.Background = Brushes.Black;
+                    GpuChart.Background = Brushes.Black;
                     NetChart.Background = Brushes.Black;
                     DiskChart.Background = Brushes.Black;
                 }
@@ -389,6 +460,7 @@ namespace SystemWatch
                     Foreground = SystemColors.ControlTextBrush;
                     CpuChart.Background = SystemColors.WindowBrush;
                     RamChart.Background = SystemColors.WindowBrush;
+                    GpuChart.Background = SystemColors.WindowBrush;
                     NetChart.Background = SystemColors.WindowBrush;
                     DiskChart.Background = SystemColors.WindowBrush;
                 }
@@ -438,6 +510,7 @@ namespace SystemWatch
             {
                 InitCpuChart();
                 InitRamChart();
+                InitGpuChart();
                 InitNetChart();
                 InitDiskChart();
                 InitAdapters();
