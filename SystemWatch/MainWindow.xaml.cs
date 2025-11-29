@@ -2,16 +2,12 @@
 using LiveCharts.Wpf;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using SystemWatch.Monitoring;
 
 namespace SystemWatch
 {
@@ -21,32 +17,20 @@ namespace SystemWatch
         private const string RunRegKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
 
         private readonly DispatcherTimer _timer;
-        private readonly PerformanceCounter _cpuCounter;
-        private readonly PerformanceCounter _ramAvailableCounter;
-        private PerformanceCounter _netSentCounter;
-        private PerformanceCounter _netReceivedCounter;
-        private PerformanceCounter _diskBytesCounter;
-        private PerformanceCounter[] _gpuCounters;
-        private readonly ulong _totalRamBytes;
+        private readonly SystemMonitor _monitor;
 
         private readonly ChartValues<double> _cpuValues = new ChartValues<double>();
         private readonly ChartValues<double> _ramValues = new ChartValues<double>();
+        private readonly ChartValues<double> _gpuValues = new ChartValues<double>();
         private readonly ChartValues<double> _netValues = new ChartValues<double>();
         private readonly ChartValues<double> _diskValues = new ChartValues<double>();
-        private readonly ChartValues<double> _gpuValues = new ChartValues<double>();
         private int _historyLength = 60;
-        private string _currentDrive = "C:\\";
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            _ = _cpuCounter.NextValue();
-
-            _ramAvailableCounter = new PerformanceCounter("Memory", "Available MBytes");
-
-            _totalRamBytes = GetTotalMemoryInBytes();
+            _monitor = new SystemMonitor();
 
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -175,97 +159,30 @@ namespace SystemWatch
 
         private void InitAdapters()
         {
-            var category = new PerformanceCounterCategory("Network Interface");
-            string[] instances = category.GetInstanceNames();
-
-            var filtered = instances
-                .Where(name =>
-                    !name.ToLower().Contains("loopback") &&
-                    !name.ToLower().Contains("isatap"))
-                .ToArray();
+            var adapters = _monitor.GetNetworkAdapters();
 
             AdapterCombo.Items.Clear();
 
-            foreach (var name in filtered)
+            foreach (var name in adapters)
             {
                 var item = new ComboBoxItem { Content = name, Tag = name };
                 AdapterCombo.Items.Add(item);
             }
 
-            if (AdapterCombo.Items.Count == 0)
-            {
-                foreach (var name in instances)
-                {
-                    var item = new ComboBoxItem { Content = name, Tag = name };
-                    AdapterCombo.Items.Add(item);
-                }
-            }
-
             if (AdapterCombo.Items.Count > 0)
                 AdapterCombo.SelectedIndex = 0;
-
-            InitDiskCounter();
-            InitGpuCounters();
-        }
-
-        private void InitDiskCounter()
-        {
-            try
-            {
-                var category = new PerformanceCounterCategory("PhysicalDisk");
-                string[] instances = category.GetInstanceNames();
-                string name = instances.FirstOrDefault(n => n == "_Total") ?? instances.FirstOrDefault() ?? "";
-                if (!string.IsNullOrEmpty(name))
-                {
-                    _diskBytesCounter = new PerformanceCounter("PhysicalDisk", "Disk Bytes/sec", name);
-                    _ = _diskBytesCounter.NextValue();
-                }
-            }
-            catch
-            {
-                _diskBytesCounter = null;
-            }
-        }
-
-        private void InitGpuCounters()
-        {
-            try
-            {
-                var category = new PerformanceCounterCategory("GPU Engine");
-                string[] instances = category.GetInstanceNames();
-                var list = new List<PerformanceCounter>();
-                foreach (var inst in instances)
-                {
-                    string lower = inst.ToLower();
-                    if (lower.Contains("engtype_3d"))
-                    {
-                        list.Add(new PerformanceCounter("GPU Engine", "Utilization Percentage", inst));
-                    }
-                }
-                _gpuCounters = list.ToArray();
-                if (_gpuCounters.Length > 0)
-                {
-                    foreach (var c in _gpuCounters)
-                        _ = c.NextValue();
-                }
-            }
-            catch
-            {
-                _gpuCounters = null;
-            }
         }
 
         private void InitDrives()
         {
+            var drives = _monitor.GetDrives();
+
             DriveCombo.Items.Clear();
 
-            foreach (var drive in DriveInfo.GetDrives())
+            foreach (var name in drives)
             {
-                if (drive.DriveType == DriveType.Fixed && drive.IsReady)
-                {
-                    var item = new ComboBoxItem { Content = drive.Name, Tag = drive.Name };
-                    DriveCombo.Items.Add(item);
-                }
+                var item = new ComboBoxItem { Content = name, Tag = name };
+                DriveCombo.Items.Add(item);
             }
 
             if (DriveCombo.Items.Count > 0)
@@ -274,72 +191,40 @@ namespace SystemWatch
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            float cpuUsage = _cpuCounter.NextValue();
+            var stats = _monitor.Read();
 
-            float availableMB = _ramAvailableCounter.NextValue();
-            double availableBytes = availableMB * 1024 * 1024;
-            double usedPercent = (1 - (availableBytes / _totalRamBytes)) * 100.0;
+            CpuText.Text = $"{stats.CpuPercent:0.0} %";
+            RamText.Text = $"{stats.RamPercent:0.0} %";
 
-            CpuText.Text = $"{cpuUsage:0.0} %";
-            RamText.Text = $"{usedPercent:0.0} %";
+            if (stats.GpuAvailable)
+                GpuText.Text = $"{stats.GpuPercent:0.0} %";
+            else
+                GpuText.Text = "nicht verfügbar";
 
-            double gpuUsage = 0;
-            if (_gpuCounters != null && _gpuCounters.Length > 0)
+            if (stats.NetworkAdapterAvailable)
+                NetText.Text = $"{stats.NetKiloBytesPerSecond:0.0} kB/s";
+            else
+                NetText.Text = "kein Adapter";
+
+            if (stats.DriveError)
             {
-                foreach (var c in _gpuCounters)
-                    gpuUsage += c.NextValue();
+                DiskText.Text = $"{stats.DriveName} Fehler, IO {stats.DiskMegaBytesPerSecond:0.00} MB/s";
             }
-            GpuText.Text = _gpuCounters == null || _gpuCounters.Length == 0
-                ? "nicht verfügbar"
-                : $"{gpuUsage:0.0} %";
-
-            double kBps = 0;
-            if (_netSentCounter != null && _netReceivedCounter != null)
+            else if (!stats.DriveReady)
             {
-                float sent = _netSentCounter.NextValue();
-                float received = _netReceivedCounter.NextValue();
-                double totalBytesPerSec = sent + received;
-                kBps = totalBytesPerSec / 1024.0;
-                NetText.Text = $"{kBps:0.0} kB/s";
+                DiskText.Text = $"{stats.DriveName} nicht bereit, IO {stats.DiskMegaBytesPerSecond:0.00} MB/s";
             }
             else
             {
-                NetText.Text = "kein Adapter";
+                DiskText.Text =
+                    $"{stats.DriveName} {stats.DriveFreeGb:0.0} GB frei / {stats.DriveTotalGb:0.0} GB ({stats.DriveUsedPercent:0.0} % genutzt), IO {stats.DiskMegaBytesPerSecond:0.00} MB/s";
             }
 
-            double diskMBps = 0;
-            if (_diskBytesCounter != null)
-            {
-                double bytes = _diskBytesCounter.NextValue();
-                diskMBps = bytes / (1024.0 * 1024.0);
-            }
-
-            try
-            {
-                var drive = new DriveInfo(_currentDrive);
-                if (drive.IsReady)
-                {
-                    double totalGB = drive.TotalSize / (1024.0 * 1024.0 * 1024.0);
-                    double freeGB = drive.AvailableFreeSpace / (1024.0 * 1024.0 * 1024.0);
-                    double usedGB = totalGB - freeGB;
-                    double usedDiskPercent = (usedGB / totalGB) * 100.0;
-                    DiskText.Text = $"{_currentDrive} {freeGB:0.0} GB frei / {totalGB:0.0} GB ({usedDiskPercent:0.0} % genutzt), IO {diskMBps:0.00} MB/s";
-                }
-                else
-                {
-                    DiskText.Text = $"{_currentDrive} nicht bereit, IO {diskMBps:0.00} MB/s";
-                }
-            }
-            catch
-            {
-                DiskText.Text = $"{_currentDrive} Fehler, IO {diskMBps:0.00} MB/s";
-            }
-
-            AppendValue(_cpuValues, cpuUsage);
-            AppendValue(_ramValues, usedPercent);
-            AppendValue(_gpuValues, gpuUsage);
-            AppendValue(_netValues, kBps);
-            AppendValue(_diskValues, diskMBps);
+            AppendValue(_cpuValues, stats.CpuPercent);
+            AppendValue(_ramValues, stats.RamPercent);
+            AppendValue(_gpuValues, stats.GpuPercent ?? 0);
+            AppendValue(_netValues, stats.NetKiloBytesPerSecond);
+            AppendValue(_diskValues, stats.DiskMegaBytesPerSecond);
         }
 
         private void AppendValue(ChartValues<double> values, double newValue)
@@ -348,36 +233,6 @@ namespace SystemWatch
                 values.RemoveAt(0);
             values.Add(newValue);
         }
-
-        private static ulong GetTotalMemoryInBytes()
-        {
-            MEMORYSTATUSEX mem = new MEMORYSTATUSEX();
-            if (GlobalMemoryStatusEx(mem))
-                return mem.ullTotalPhys;
-            return 0;
-        }
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        private class MEMORYSTATUSEX
-        {
-            public uint dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
-            public uint dwMemoryLoad;
-            public ulong ullTotalPhys;
-            public ulong ullAvailPhys;
-            public ulong ullTotalPageFile;
-            public ulong ullAvailPageFile;
-            public ulong ullTotalVirtual;
-            public ulong ullAvailVirtual;
-            public ulong ullAvailExtendedVirtual;
-
-            public MEMORYSTATUSEX()
-            {
-                dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
-            }
-        }
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
-        private static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
 
         private void UpdateRateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -411,18 +266,7 @@ namespace SystemWatch
                 item.Tag is string name &&
                 !string.IsNullOrWhiteSpace(name))
             {
-                try
-                {
-                    _netSentCounter = new PerformanceCounter("Network Interface", "Bytes Sent/sec", name);
-                    _netReceivedCounter = new PerformanceCounter("Network Interface", "Bytes Received/sec", name);
-                    _ = _netSentCounter.NextValue();
-                    _ = _netReceivedCounter.NextValue();
-                }
-                catch
-                {
-                    _netSentCounter = null;
-                    _netReceivedCounter = null;
-                }
+                _monitor.SetNetworkAdapter(name);
             }
         }
 
@@ -432,7 +276,7 @@ namespace SystemWatch
                 item.Tag is string name &&
                 !string.IsNullOrWhiteSpace(name))
             {
-                _currentDrive = name;
+                _monitor.SetDrive(name);
             }
         }
 
@@ -441,31 +285,34 @@ namespace SystemWatch
             if (CpuChart == null || RamChart == null || GpuChart == null || NetChart == null || DiskChart == null)
                 return;
 
-            if (ThemeCombo.SelectedItem is ComboBoxItem item &&
-                item.Tag is string mode)
+            if (ThemeCombo.SelectedItem is ComboBoxItem item && item.Tag is string mode)
             {
+                var windowBg = (SolidColorBrush)Resources["WindowBackgroundBrush"];
+                var cardBg = (SolidColorBrush)Resources["CardBackgroundBrush"];
+                var fg = (SolidColorBrush)Resources["ForegroundBrush"];
+
                 if (mode == "Dark")
                 {
-                    Background = Brushes.Black;
-                    Foreground = Brushes.White;
-                    CpuChart.Background = Brushes.Black;
-                    RamChart.Background = Brushes.Black;
-                    GpuChart.Background = Brushes.Black;
-                    NetChart.Background = Brushes.Black;
-                    DiskChart.Background = Brushes.Black;
+                    windowBg.Color = Color.FromRgb(36, 39, 46);   // dunkles Grau
+                    cardBg.Color = Color.FromRgb(45, 48, 56);     // Karten-Grau
+                    fg.Color = Colors.White;
                 }
                 else
                 {
-                    Background = SystemColors.WindowBrush;
-                    Foreground = SystemColors.ControlTextBrush;
-                    CpuChart.Background = SystemColors.WindowBrush;
-                    RamChart.Background = SystemColors.WindowBrush;
-                    GpuChart.Background = SystemColors.WindowBrush;
-                    NetChart.Background = SystemColors.WindowBrush;
-                    DiskChart.Background = SystemColors.WindowBrush;
+                    windowBg.Color = Color.FromRgb(240, 242, 245); // helles Grau
+                    cardBg.Color = Colors.White;
+                    fg.Color = Color.FromRgb(0, 0, 0);
                 }
+
+                CpuChart.Background = cardBg;
+                RamChart.Background = cardBg;
+                GpuChart.Background = cardBg;
+                NetChart.Background = cardBg;
+                DiskChart.Background = cardBg;
             }
         }
+
+
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -540,6 +387,8 @@ namespace SystemWatch
 
                 key.SetValue("WindowState", WindowState.ToString());
             }
+
+            _monitor.Dispose();
         }
 
         private void AutostartCheck_Changed(object sender, RoutedEventArgs e)

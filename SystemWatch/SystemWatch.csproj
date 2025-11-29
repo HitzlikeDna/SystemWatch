@@ -80,6 +80,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Monitoring\SystemMonitor.cs" />
+    <Compile Include="Monitoring\SystemStats.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
