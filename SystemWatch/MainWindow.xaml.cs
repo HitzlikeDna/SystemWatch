@@ -51,10 +51,24 @@ namespace SystemWatch
             if (chart == null) return;
             values.Clear();
             for (int i = 0; i < _historyLength; i++) values.Add(0);
-            chart.Series = new SeriesCollection { new LineSeries { Values = values, PointGeometry = null, LineSmoothness = 0, Fill = Brushes.Transparent, StrokeThickness = 2 } };
+
+            chart.Series = new SeriesCollection {
+                new LineSeries {
+                    Title = title,
+                    Values = values,
+                    PointGeometry = null,
+                    LineSmoothness = 0,
+                    Fill = new SolidColorBrush(Color.FromArgb(40, 33, 150, 243)),
+                    StrokeThickness = 2
+                }
+            };
+
             chart.AxisX = new AxesCollection { new Axis { ShowLabels = false } };
-            if (max > 0) chart.AxisY = new AxesCollection { new Axis { MinValue = 0, MaxValue = max, ShowLabels = false } };
-            else chart.AxisY = new AxesCollection { new Axis { MinValue = 0, ShowLabels = false } };
+
+            if (max > 0) chart.AxisY = new AxesCollection { new Axis { MinValue = 0, MaxValue = max, Foreground = Brushes.Gray } };
+            else chart.AxisY = new AxesCollection { new Axis { MinValue = 0, Foreground = Brushes.Gray } };
+
+            chart.DataTooltip = new DefaultTooltip { SelectionMode = TooltipSelectionMode.SharedXValues };
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -150,6 +164,9 @@ namespace SystemWatch
                 if (double.TryParse(key.GetValue("Width")?.ToString(), out double dw)) Width = dw;
                 if (double.TryParse(key.GetValue("Height")?.ToString(), out double dh)) Height = dh;
             }
+
+            ThemeCombo.SelectedIndex = 1;
+
             InitCpuChart(); InitRamChart(); InitGpuChart(); InitNetChart(); InitDiskChart();
             InitAdapters(); InitDrives();
             _timer.Start();

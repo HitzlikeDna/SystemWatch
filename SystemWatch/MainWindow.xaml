@@ -10,14 +10,14 @@
         Foreground="{DynamicResource ForegroundBrush}">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFF0F2F5" />
-        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFFFF" />
-        <SolidColorBrush x:Key="ForegroundBrush" Color="#FF000000" />
+        <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FF1E1E1E" />
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FF2D2D2D" />
+        <SolidColorBrush x:Key="ForegroundBrush" Color="#FFFFFFFF" />
     </Window.Resources>
 
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <TabControl Background="Transparent" BorderThickness="0" Margin="5">
-            <TabItem Header="Dashboard">
+            <TabItem Header="Dashboard" Foreground="{DynamicResource ForegroundBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -27,22 +27,22 @@
 
                     <Border Grid.Row="0" Margin="5" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="SystemWatch" FontSize="18" FontWeight="Bold" Margin="0,0,20,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="Rate:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <TextBlock Text="SystemWatch" FontSize="18" FontWeight="Bold" Margin="0,0,20,0" VerticalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
+                            <TextBlock Text="Rate:" VerticalAlignment="Center" Margin="0,0,5,0" Foreground="{DynamicResource ForegroundBrush}"/>
                             <ComboBox x:Name="UpdateRateCombo" Width="80" SelectionChanged="UpdateRateCombo_SelectionChanged">
                                 <ComboBoxItem Tag="500">0,5s</ComboBoxItem>
                                 <ComboBoxItem Tag="1000" IsSelected="True">1s</ComboBoxItem>
                                 <ComboBoxItem Tag="2000">2s</ComboBoxItem>
                             </ComboBox>
-                            <TextBlock Text=" History:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                            <TextBlock Text=" History:" VerticalAlignment="Center" Margin="10,0,5,0" Foreground="{DynamicResource ForegroundBrush}"/>
                             <ComboBox x:Name="HistoryCombo" Width="80" SelectionChanged="HistoryCombo_SelectionChanged">
                                 <ComboBoxItem Tag="30">kurz</ComboBoxItem>
                                 <ComboBoxItem Tag="60" IsSelected="True">mittel</ComboBoxItem>
                             </ComboBox>
-                            <CheckBox x:Name="AutostartCheck" Content="Autostart" Margin="15,0,0,0" VerticalAlignment="Center" Checked="AutostartCheck_Changed" Unchecked="AutostartCheck_Changed"/>
+                            <CheckBox x:Name="AutostartCheck" Content="Autostart" Margin="15,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}" Checked="AutostartCheck_Changed" Unchecked="AutostartCheck_Changed"/>
                             <ComboBox x:Name="ThemeCombo" Width="80" Margin="15,0,0,0" SelectionChanged="ThemeCombo_SelectionChanged">
-                                <ComboBoxItem Tag="Light" IsSelected="True">Hell</ComboBoxItem>
-                                <ComboBoxItem Tag="Dark">Dunkel</ComboBoxItem>
+                                <ComboBoxItem Tag="Light">Hell</ComboBoxItem>
+                                <ComboBoxItem Tag="Dark" IsSelected="True">Dunkel</ComboBoxItem>
                             </ComboBox>
                         </StackPanel>
                     </Border>
@@ -56,32 +56,32 @@
                         </Grid.ColumnDefinitions>
                         <Border Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
                             <StackPanel>
-                                <TextBlock Text="CPU" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                <TextBlock x:Name="CpuText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="CPU" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
+                                <TextBlock x:Name="CpuText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="1" Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
                             <StackPanel>
-                                <TextBlock Text="RAM" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                <TextBlock x:Name="RamText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="RAM" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
+                                <TextBlock x:Name="RamText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="2" Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
                             <StackPanel>
-                                <TextBlock Text="GPU" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                <TextBlock x:Name="GpuText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock Text="GPU" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
+                                <TextBlock x:Name="GpuText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ForegroundBrush}"/>
                             </StackPanel>
                         </Border>
                         <Border Grid.Column="3" Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
                             <UniformGrid Columns="2">
                                 <StackPanel Margin="5,0">
-                                    <TextBlock Text="Netz:" FontSize="10"/>
-                                    <TextBlock x:Name="NetText" FontWeight="Bold" FontSize="12"/>
+                                    <TextBlock Text="Netz:" FontSize="10" Foreground="{DynamicResource ForegroundBrush}"/>
+                                    <TextBlock x:Name="NetText" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource ForegroundBrush}"/>
                                 </StackPanel>
                                 <ComboBox x:Name="AdapterCombo" FontSize="10" SelectionChanged="AdapterCombo_SelectionChanged" VerticalAlignment="Center"/>
                                 <StackPanel Margin="5,0">
-                                    <TextBlock Text="Disk:" FontSize="10"/>
-                                    <TextBlock x:Name="DiskText" FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="Disk:" FontSize="10" Foreground="{DynamicResource ForegroundBrush}"/>
+                                    <TextBlock x:Name="DiskText" FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ForegroundBrush}"/>
                                 </StackPanel>
                                 <ComboBox x:Name="DriveCombo" FontSize="10" SelectionChanged="DriveCombo_SelectionChanged" VerticalAlignment="Center"/>
                             </UniformGrid>
@@ -91,39 +91,39 @@
                     <UniformGrid Grid.Row="2" Rows="5" Margin="5">
                         <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
                             <Grid>
-                                <TextBlock Text="CPU" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
-                                <lvc:CartesianChart x:Name="CpuChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                                <TextBlock Text="CPU" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="CpuChart" Hoverable="True"/>
                             </Grid>
                         </Border>
                         <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
                             <Grid>
-                                <TextBlock Text="RAM" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
-                                <lvc:CartesianChart x:Name="RamChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                                <TextBlock Text="RAM" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="RamChart" Hoverable="True"/>
                             </Grid>
                         </Border>
                         <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
                             <Grid>
-                                <TextBlock Text="GPU" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
-                                <lvc:CartesianChart x:Name="GpuChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                                <TextBlock Text="GPU" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="GpuChart" Hoverable="True"/>
                             </Grid>
                         </Border>
                         <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
                             <Grid>
-                                <TextBlock Text="NET" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
-                                <lvc:CartesianChart x:Name="NetChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                                <TextBlock Text="NET" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="NetChart" Hoverable="True"/>
                             </Grid>
                         </Border>
                         <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
                             <Grid>
-                                <TextBlock Text="DISK" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
-                                <lvc:CartesianChart x:Name="DiskChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                                <TextBlock Text="DISK" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ForegroundBrush}" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="DiskChart" Hoverable="True"/>
                             </Grid>
                         </Border>
                     </UniformGrid>
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Prozesse">
+            <TabItem Header="Prozesse" Foreground="{DynamicResource ForegroundBrush}">
                 <Border Margin="5" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
                     <ListView x:Name="ProcessListView" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource ForegroundBrush}">
                         <ListView.View>
