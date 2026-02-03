@@ -2,9 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
-        Title="SystemWatch"
-        Width="1000"
-        Height="800"
+        Title="SystemWatch Pro"
+        Width="1050"
+        Height="850"
         Loaded="MainWindow_Loaded"
         Closing="MainWindow_Closing"
         Foreground="{DynamicResource ForegroundBrush}">
@@ -16,182 +16,132 @@
     </Window.Resources>
 
     <Grid Background="{DynamicResource WindowBackgroundBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <Border Grid.Row="0" Margin="0,0,0,10" Padding="16"
-                Background="{DynamicResource CardBackgroundBrush}"
-                CornerRadius="12">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="8" ShadowDepth="2" Opacity="0.3"/>
-            </Border.Effect>
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                <TextBlock Text="SystemWatch"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           Margin="0,0,0,8"
-                           HorizontalAlignment="Center"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                    <TextBlock Text="Update-Rate:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox x:Name="UpdateRateCombo" Width="120" SelectionChanged="UpdateRateCombo_SelectionChanged">
-                        <ComboBoxItem Tag="500">0,5 s</ComboBoxItem>
-                        <ComboBoxItem Tag="1000" IsSelected="True">1 s</ComboBoxItem>
-                        <ComboBoxItem Tag="2000">2 s</ComboBoxItem>
-                        <ComboBoxItem Tag="4000">4 s</ComboBoxItem>
-                    </ComboBox>
-
-                    <TextBlock Text="  Verlauf:" VerticalAlignment="Center" Margin="16,0,8,0"/>
-                    <ComboBox x:Name="HistoryCombo" Width="120" SelectionChanged="HistoryCombo_SelectionChanged">
-                        <ComboBoxItem Tag="30">kurz</ComboBoxItem>
-                        <ComboBoxItem Tag="60" IsSelected="True">mittel</ComboBoxItem>
-                        <ComboBoxItem Tag="120">lang</ComboBoxItem>
-                    </ComboBox>
-                </StackPanel>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
-                    <TextBlock Text="Theme:" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <ComboBox x:Name="ThemeCombo" Width="120" SelectionChanged="ThemeCombo_SelectionChanged">
-                        <ComboBoxItem Tag="Light" IsSelected="True">Hell</ComboBoxItem>
-                        <ComboBoxItem Tag="Dark">Dunkel</ComboBoxItem>
-                    </ComboBox>
-
-                    <CheckBox x:Name="AutostartCheck"
-                              Content="Autostart"
-                              Margin="16,0,0,0"
-                              VerticalAlignment="Center"
-                              Checked="AutostartCheck_Changed"
-                              Unchecked="AutostartCheck_Changed"/>
-                </StackPanel>
-            </StackPanel>
-        </Border>
-
-        <Grid Grid.Row="1" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
-
-            <Border Margin="0,0,10,0" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="CPU" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center"/>
-                    <TextBlock x:Name="CpuText" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Column="1" Margin="0,0,10,0" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="RAM" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center"/>
-                    <TextBlock x:Name="RamText" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Column="2" Margin="0,0,10,0" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <StackPanel HorizontalAlignment="Center">
-                    <TextBlock Text="GPU" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center"/>
-                    <TextBlock x:Name="GpuText" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Column="3" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                        <TextBlock Text="Netz:" FontWeight="Bold" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="NetText" FontSize="14" FontWeight="Bold"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Adapter:" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <ComboBox x:Name="AdapterCombo"
-                                  Width="260"
-                                  VerticalAlignment="Center"
-                                  SelectionChanged="AdapterCombo_SelectionChanged"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Disk:" FontWeight="Bold" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="DiskText" FontSize="12" TextTrimming="CharacterEllipsis" Width="280"/>
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Laufwerk:" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <ComboBox x:Name="DriveCombo"
-                                  Width="80"
-                                  VerticalAlignment="Center"
-                                  SelectionChanged="DriveCombo_SelectionChanged"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <Grid Grid.Row="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Border Grid.Row="0" Margin="0,0,0,8" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
+        <TabControl Background="Transparent" BorderThickness="0" Margin="5">
+            <TabItem Header="Dashboard">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="CPU Verlauf" FontWeight="Bold" Margin="0,0,0,4"/>
-                    <lvc:CartesianChart x:Name="CpuChart" Grid.Row="1"/>
-                </Grid>
-            </Border>
-
-            <Border Grid.Row="1" Margin="0,0,0,8" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="RAM Verlauf" FontWeight="Bold" Margin="0,0,0,4"/>
-                    <lvc:CartesianChart x:Name="RamChart" Grid.Row="1"/>
-                </Grid>
-            </Border>
 
-            <Border Grid.Row="2" Margin="0,0,0,8" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="GPU Verlauf" FontWeight="Bold" Margin="0,0,0,4"/>
-                    <lvc:CartesianChart x:Name="GpuChart" Grid.Row="1"/>
-                </Grid>
-            </Border>
+                    <Border Grid.Row="0" Margin="5" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="SystemWatch" FontSize="18" FontWeight="Bold" Margin="0,0,20,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Rate:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                            <ComboBox x:Name="UpdateRateCombo" Width="80" SelectionChanged="UpdateRateCombo_SelectionChanged">
+                                <ComboBoxItem Tag="500">0,5s</ComboBoxItem>
+                                <ComboBoxItem Tag="1000" IsSelected="True">1s</ComboBoxItem>
+                                <ComboBoxItem Tag="2000">2s</ComboBoxItem>
+                            </ComboBox>
+                            <TextBlock Text=" History:" VerticalAlignment="Center" Margin="10,0,5,0"/>
+                            <ComboBox x:Name="HistoryCombo" Width="80" SelectionChanged="HistoryCombo_SelectionChanged">
+                                <ComboBoxItem Tag="30">kurz</ComboBoxItem>
+                                <ComboBoxItem Tag="60" IsSelected="True">mittel</ComboBoxItem>
+                            </ComboBox>
+                            <CheckBox x:Name="AutostartCheck" Content="Autostart" Margin="15,0,0,0" VerticalAlignment="Center" Checked="AutostartCheck_Changed" Unchecked="AutostartCheck_Changed"/>
+                            <ComboBox x:Name="ThemeCombo" Width="80" Margin="15,0,0,0" SelectionChanged="ThemeCombo_SelectionChanged">
+                                <ComboBoxItem Tag="Light" IsSelected="True">Hell</ComboBoxItem>
+                                <ComboBoxItem Tag="Dark">Dunkel</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
 
-            <Border Grid.Row="3" Margin="0,0,0,8" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Netz Verlauf" FontWeight="Bold" Margin="0,0,0,4"/>
-                    <lvc:CartesianChart x:Name="NetChart" Grid.Row="1"/>
-                </Grid>
-            </Border>
+                    <Grid Grid.Row="1" Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="CPU" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="CpuText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="RAM" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="RamText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="GPU" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="GpuText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="3" Margin="2" Padding="8" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8">
+                            <UniformGrid Columns="2">
+                                <StackPanel Margin="5,0">
+                                    <TextBlock Text="Netz:" FontSize="10"/>
+                                    <TextBlock x:Name="NetText" FontWeight="Bold" FontSize="12"/>
+                                </StackPanel>
+                                <ComboBox x:Name="AdapterCombo" FontSize="10" SelectionChanged="AdapterCombo_SelectionChanged" VerticalAlignment="Center"/>
+                                <StackPanel Margin="5,0">
+                                    <TextBlock Text="Disk:" FontSize="10"/>
+                                    <TextBlock x:Name="DiskText" FontWeight="Bold" FontSize="10" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <ComboBox x:Name="DriveCombo" FontSize="10" SelectionChanged="DriveCombo_SelectionChanged" VerticalAlignment="Center"/>
+                            </UniformGrid>
+                        </Border>
+                    </Grid>
 
-            <Border Grid.Row="4" Margin="0,0,0,0" Padding="10" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Disk Verlauf" FontWeight="Bold" Margin="0,0,0,4"/>
-                    <lvc:CartesianChart x:Name="DiskChart" Grid.Row="1"/>
+                    <UniformGrid Grid.Row="2" Rows="5" Margin="5">
+                        <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
+                            <Grid>
+                                <TextBlock Text="CPU" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="CpuChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                            </Grid>
+                        </Border>
+                        <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
+                            <Grid>
+                                <TextBlock Text="RAM" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="RamChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                            </Grid>
+                        </Border>
+                        <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
+                            <Grid>
+                                <TextBlock Text="GPU" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="GpuChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                            </Grid>
+                        </Border>
+                        <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
+                            <Grid>
+                                <TextBlock Text="NET" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="NetChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                            </Grid>
+                        </Border>
+                        <Border Margin="2" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="5">
+                            <Grid>
+                                <TextBlock Text="DISK" FontSize="10" FontWeight="Bold" VerticalAlignment="Top"/>
+                                <lvc:CartesianChart x:Name="DiskChart" Hoverable="False" DataTooltip="{x:Null}"/>
+                            </Grid>
+                        </Border>
+                    </UniformGrid>
                 </Grid>
-            </Border>
-        </Grid>
+            </TabItem>
+
+            <TabItem Header="Prozesse">
+                <Border Margin="5" Padding="5" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="10">
+                    <ListView x:Name="ProcessListView" Background="Transparent" BorderThickness="0" Foreground="{DynamicResource ForegroundBrush}">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}" Width="200"/>
+                                <GridViewColumn Header="RAM" DisplayMemberBinding="{Binding MemoryMb, StringFormat={}{0:N0} MB}" Width="100"/>
+                                <GridViewColumn Header="Aktion" Width="100">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Beenden" Background="#FFFF4444" Foreground="White" Padding="5,2" Click="KillProcess_Click" Tag="{Binding Id}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Border>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>
