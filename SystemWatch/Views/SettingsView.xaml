@@ -1,0 +1,153 @@
+<UserControl x:Class="SystemWatch.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:SystemWatch.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:SettingsViewModel}"
+             d:DesignWidth="900" d:DesignHeight="900">
+
+    <UserControl.Resources>
+        <Style x:Key="RowTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        </Style>
+        <Style x:Key="RowDescription" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+            <Setter Property="Margin" Value="0,3,0,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="TextTrimming" Value="None" />
+        </Style>
+        <Style x:Key="SettingRow" TargetType="Grid">
+            <Setter Property="Margin" Value="18,14" />
+        </Style>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+        <!-- Linksbündig wie die anderen Seiten, aber nicht breiter als gut lesbar -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MaxWidth="860" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+        <StackPanel Margin="6,0,18,24">
+
+            <TextBlock Text="Einstellungen" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="Änderungen werden sofort übernommen und gespeichert." Style="{StaticResource PageSubtitle}" Margin="0,4,0,0" />
+
+            <!-- Messung -->
+            <TextBlock Text="Messung" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Padding="0">
+                <StackPanel>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,24,0" VerticalAlignment="Center">
+                            <TextBlock Text="Aktualisierungsintervall" Style="{StaticResource RowTitle}" />
+                            <TextBlock Text="Wie oft alle Werte gemessen werden. Kürzere Intervalle reagieren schneller, kosten aber etwas mehr Leistung."
+                                       Style="{StaticResource RowDescription}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource SegmentHost}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource Segment}" GroupName="Interval" Content="0,5 s"
+                                             IsChecked="{Binding UpdateIntervalMs, Converter={StaticResource EqualsConverter}, ConverterParameter=500}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="Interval" Content="1 s"
+                                             IsChecked="{Binding UpdateIntervalMs, Converter={StaticResource EqualsConverter}, ConverterParameter=1000}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="Interval" Content="2 s"
+                                             IsChecked="{Binding UpdateIntervalMs, Converter={StaticResource EqualsConverter}, ConverterParameter=2000}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="Interval" Content="5 s"
+                                             IsChecked="{Binding UpdateIntervalMs, Converter={StaticResource EqualsConverter}, ConverterParameter=5000}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Style="{StaticResource Divider}" />
+
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,24,0" VerticalAlignment="Center">
+                            <TextBlock Text="Verlauf" Style="{StaticResource RowTitle}" />
+                            <TextBlock Text="Welcher Zeitraum in den Graphen sichtbar ist." Style="{StaticResource RowDescription}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource SegmentHost}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource Segment}" GroupName="History" Content="30 s"
+                                             IsChecked="{Binding HistorySeconds, Converter={StaticResource EqualsConverter}, ConverterParameter=30}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="History" Content="1 min"
+                                             IsChecked="{Binding HistorySeconds, Converter={StaticResource EqualsConverter}, ConverterParameter=60}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="History" Content="2 min"
+                                             IsChecked="{Binding HistorySeconds, Converter={StaticResource EqualsConverter}, ConverterParameter=120}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="History" Content="5 min"
+                                             IsChecked="{Binding HistorySeconds, Converter={StaticResource EqualsConverter}, ConverterParameter=300}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Darstellung -->
+            <TextBlock Text="Darstellung" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Padding="0">
+                <StackPanel>
+                    <CheckBox Style="{StaticResource ToggleSwitch}" Padding="18,14" IsChecked="{Binding SmoothAnimations}">
+                        <StackPanel>
+                            <TextBlock Text="Flüssige Graphen" Style="{StaticResource RowTitle}" />
+                            <TextBlock Text="Graphen gleiten stufenlos zwischen den Messwerten. Ausgeschaltet springen sie im Messtakt und brauchen weniger Rechenleistung."
+                                       Style="{StaticResource RowDescription}" />
+                        </StackPanel>
+                    </CheckBox>
+                    <Border Style="{StaticResource Divider}" />
+                    <CheckBox Style="{StaticResource ToggleSwitch}" Padding="18,14" IsChecked="{Binding AlwaysOnTop}">
+                        <StackPanel>
+                            <TextBlock Text="Immer im Vordergrund" Style="{StaticResource RowTitle}" />
+                            <TextBlock Text="SystemWatch bleibt über anderen Fenstern sichtbar." Style="{StaticResource RowDescription}" />
+                        </StackPanel>
+                    </CheckBox>
+                </StackPanel>
+            </Border>
+
+            <!-- System -->
+            <TextBlock Text="System" Style="{StaticResource SectionTitle}" />
+            <Border Style="{StaticResource Card}" Padding="0">
+                <CheckBox Style="{StaticResource ToggleSwitch}" Padding="18,14" IsChecked="{Binding Autostart}">
+                    <StackPanel>
+                        <TextBlock Text="Mit Windows starten" Style="{StaticResource RowTitle}" />
+                        <TextBlock Text="Startet SystemWatch nach der Anmeldung minimiert in der Taskleiste." Style="{StaticResource RowDescription}" />
+                    </StackPanel>
+                </CheckBox>
+            </Border>
+
+            <!-- Netzwerk -->
+            <Grid>
+                <TextBlock Text="Netzwerkadapter" Style="{StaticResource SectionTitle}" />
+                <Button Style="{StaticResource LinkButton}" Content="Aktualisieren" Click="RefreshAdapters_Click"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,8" />
+            </Grid>
+            <Border Style="{StaticResource Card}" Padding="0,4">
+                <ItemsControl ItemsSource="{Binding Adapters}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:AdapterOptionViewModel}">
+                            <RadioButton Style="{StaticResource OptionRow}" GroupName="Adapter" IsChecked="{Binding IsSelected}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}" Style="{StaticResource RowTitle}" />
+                                    <TextBlock Text="{Binding Description}" Style="{StaticResource Caption}" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </RadioButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Border>
+
+            <TextBlock Margin="2,24,0,0" Style="{StaticResource Caption}">
+                <Run Text="SystemWatch" />
+                <Run Text="{Binding Version, Mode=OneWay}" />
+            </TextBlock>
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
