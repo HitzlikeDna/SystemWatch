@@ -1,0 +1,154 @@
+# Baut SystemWatch bei jedem Push und Pull Request.
+# Ein Tag wie "v2.1.0" erzeugt zusätzlich ein signiertes GitHub-Release.
+#
+# Benötigte Repository-Secrets (Signierung, optional):
+#   SIGNING_CERT_PFX_BASE64  – Code-Signing-Zertifikat (.pfx) als Base64
+#   SIGNING_CERT_PASSWORD    – Passwort der .pfx-Datei
+# Fehlen sie, wird unsigniert gebaut (mit Warnung).
+
+name: Build & Release
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: windows-latest
+    permissions:
+      contents: write       # Release anlegen
+      id-token: write       # Build-Nachweis (Attestation)
+      attestations: write
+
+    env:
+      PROJECT: SystemWatch/SystemWatch.csproj
+      OUTPUT: SystemWatch/bin/Release/net48
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v7
+
+      - name: Version bestimmen
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content $env:PROJECT
+          $base = ($project.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1)
+
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $version = $env:GITHUB_REF_NAME.TrimStart('v')
+            if ($version -notmatch '^\d+\.\d+\.\d+$') {
+              Write-Error "Tag '$env:GITHUB_REF_NAME' hat nicht das Format vX.Y.Z"
+              exit 1
+            }
+          } else {
+            $version = "$base-ci.$env:GITHUB_RUN_NUMBER"
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $version"
+
+      - name: Bauen (Release)
+        shell: pwsh
+        run: |
+          $msbuild = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+            -latest -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' |
+            Select-Object -First 1
+          & $msbuild $env:PROJECT /restore /m /v:minimal /nologo `
+            /p:Configuration=Release `
+            /p:Version=${{ steps.version.outputs.version }} `
+            /p:ContinuousIntegrationBuild=true
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Signieren
+        shell: pwsh
+        env:
+          SIGNING_CERT: ${{ secrets.SIGNING_CERT_PFX_BASE64 }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          if (-not $env:SIGNING_CERT) {
+            Write-Host "::warning::Kein Signatur-Zertifikat hinterlegt – SystemWatch.exe bleibt unsigniert."
+            exit 0
+          }
+
+          $pfx = Join-Path $env:RUNNER_TEMP 'codesign.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:SIGNING_CERT))
+          try {
+            $signtool = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\signtool.exe" |
+              Sort-Object FullName -Descending | Select-Object -First 1
+            & $signtool.FullName sign /f $pfx /p $env:SIGNING_PASSWORD `
+              /fd SHA256 /td SHA256 /tr http://timestamp.digicert.com `
+              /d SystemWatch "$env:OUTPUT\SystemWatch.exe"
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          } finally {
+            Remove-Item $pfx -Force -ErrorAction SilentlyContinue
+          }
+
+          $signature = Get-AuthenticodeSignature "$env:OUTPUT\SystemWatch.exe"
+          Write-Host "Signiert von: $($signature.SignerCertificate.Subject)"
+          Write-Host "Fingerabdruck: $($signature.SignerCertificate.Thumbprint)"
+
+      - name: Paket schnüren
+        id: package
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $staging = Join-Path $env:RUNNER_TEMP 'SystemWatch'
+          New-Item -ItemType Directory -Force $staging, dist | Out-Null
+          Copy-Item "$env:OUTPUT\SystemWatch.exe", "$env:OUTPUT\SystemWatch.exe.config" $staging
+
+          $zip = "dist/SystemWatch-$version.zip"
+          Compress-Archive -Path "$staging\*" -DestinationPath $zip -Force
+          Copy-Item signing/SystemWatch-CodeSigning.cer dist/ -ErrorAction SilentlyContinue
+
+          Get-ChildItem dist -File | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Set-Content dist/SHA256SUMS.txt -Encoding ascii
+          Get-Content dist/SHA256SUMS.txt
+
+      - name: Build-Nachweis erstellen
+        if: github.event_name != 'pull_request'
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            dist/*.zip
+            ${{ env.OUTPUT }}/SystemWatch.exe
+
+      - name: Als Workflow-Artefakt hochladen
+        uses: actions/upload-artifact@v7
+        with:
+          name: SystemWatch-${{ steps.version.outputs.version }}
+          path: dist/
+          if-no-files-found: error
+
+      - name: GitHub-Release veröffentlichen
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $notes = @"
+          ## Installation
+          ``SystemWatch-$version.zip`` herunterladen, entpacken und ``SystemWatch.exe`` starten.
+          Voraussetzung: Windows 10/11 (das enthaltene .NET Framework 4.8 genügt).
+
+          ## Signatur
+          Die Exe ist mit einem **selbstsignierten** Zertifikat signiert. Windows zeigt deshalb
+          beim ersten Start ggf. „Unbekannter Herausgeber“ an. Prüfen lässt sich die Echtheit über
+          den Fingerabdruck des beiliegenden ``SystemWatch-CodeSigning.cer`` oder mit
+          ``gh attestation verify SystemWatch-$version.zip --repo $env:GITHUB_REPOSITORY``.
+          "@
+          gh release create $env:GITHUB_REF_NAME (Get-ChildItem dist -File).FullName `
+            --title "SystemWatch $version" --notes $notes --generate-notes --verify-tag
