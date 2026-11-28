@@ -11,7 +11,7 @@
     <UserControl.Resources>
         <Style x:Key="RowTitle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="13.5" />
-            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         </Style>
         <Style x:Key="RowDescription" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
             <Setter Property="Margin" Value="0,3,0,0" />
@@ -94,6 +94,28 @@
             <TextBlock Text="Darstellung" Style="{StaticResource SectionTitle}" />
             <Border Style="{StaticResource Card}" Padding="0">
                 <StackPanel>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,24,0" VerticalAlignment="Center">
+                            <TextBlock Text="Design" Style="{StaticResource RowTitle}" />
+                            <TextBlock Text="Dunkel ist der Standard. „Wie Windows“ folgt dem App-Modus in den Windows-Farbeinstellungen."
+                                       Style="{StaticResource RowDescription}" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Style="{StaticResource SegmentHost}">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource Segment}" GroupName="Theme" Content="Dunkel"
+                                             IsChecked="{Binding Theme, Converter={StaticResource EqualsConverter}, ConverterParameter=Dark}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="Theme" Content="Hell"
+                                             IsChecked="{Binding Theme, Converter={StaticResource EqualsConverter}, ConverterParameter=Light}" />
+                                <RadioButton Style="{StaticResource Segment}" GroupName="Theme" Content="Wie Windows"
+                                             IsChecked="{Binding Theme, Converter={StaticResource EqualsConverter}, ConverterParameter=System}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Style="{StaticResource Divider}" />
                     <CheckBox Style="{StaticResource ToggleSwitch}" Padding="18,14" IsChecked="{Binding SmoothAnimations}">
                         <StackPanel>
                             <TextBlock Text="Flüssige Graphen" Style="{StaticResource RowTitle}" />
@@ -114,12 +136,47 @@
             <!-- System -->
             <TextBlock Text="System" Style="{StaticResource SectionTitle}" />
             <Border Style="{StaticResource Card}" Padding="0">
-                <CheckBox Style="{StaticResource ToggleSwitch}" Padding="18,14" IsChecked="{Binding Autostart}">
-                    <StackPanel>
-                        <TextBlock Text="Mit Windows starten" Style="{StaticResource RowTitle}" />
-                        <TextBlock Text="Startet SystemWatch nach der Anmeldung minimiert in der Taskleiste." Style="{StaticResource RowDescription}" />
-                    </StackPanel>
-                </CheckBox>
+                <StackPanel>
+                    <CheckBox Style="{StaticResource ToggleSwitch}" Padding="18,14" IsChecked="{Binding Autostart}">
+                        <StackPanel>
+                            <TextBlock Text="Mit Windows starten" Style="{StaticResource RowTitle}" />
+                            <TextBlock Text="Startet SystemWatch nach der Anmeldung minimiert in der Taskleiste." Style="{StaticResource RowDescription}" />
+                        </StackPanel>
+                    </CheckBox>
+                    <Border Style="{StaticResource Divider}" />
+                    <CheckBox Style="{StaticResource ToggleSwitch}" Padding="18,14"
+                              IsChecked="{Binding ReplaceTaskManager, Mode=TwoWay}"
+                              IsEnabled="{Binding CanChangeReplacement}"
+                              AutomationProperties.Name="Task-Manager ersetzen">
+                        <StackPanel>
+                            <TextBlock Text="Task-Manager ersetzen" Style="{StaticResource RowTitle}" />
+                            <TextBlock Text="Strg+Umschalt+Esc, „Task-Manager“ in der Taskleiste und Strg+Alt+Entf öffnen SystemWatch statt des Windows-Task-Managers. Zum Umschalten fragt Windows nach Administratorrechten."
+                                       Style="{StaticResource RowDescription}" />
+                            <TextBlock Style="{StaticResource RowDescription}" Margin="0,6,0,0"
+                                       Visibility="{Binding ReplaceTaskManager, Converter={StaticResource BoolToVisibility}}">
+                                <Run Text="Windows startet SystemWatch von hier:" />
+                                <Run Text="{Binding ReplacementPath, Mode=OneWay}" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <Run Text="– vor dem Verschieben oder Löschen der Datei bitte ausschalten." />
+                            </TextBlock>
+                        </StackPanel>
+                    </CheckBox>
+                    <Grid Margin="18,0,18,14"
+                          Visibility="{Binding ReplacementWarning, Converter={StaticResource BoolToVisibility}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource Glyph}" Text="&#xE7BA;" Foreground="{DynamicResource WarningBrush}"
+                                   VerticalAlignment="Top" Margin="0,2,10,0" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{Binding ReplacementWarning}" Style="{StaticResource RowDescription}" Margin="0"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <Button Style="{StaticResource LinkButton}" Content="Eintrag entfernen" HorizontalAlignment="Left"
+                                    Margin="0,6,0,0" Command="{Binding RemoveStaleReplacementCommand}"
+                                    Visibility="{Binding CanRemoveStaleReplacement, Converter={StaticResource BoolToVisibility}}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
             </Border>
 
             <!-- Netzwerk -->

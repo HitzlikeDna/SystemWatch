@@ -12,8 +12,8 @@
         Icon="Icon.ico"
         Width="1280" Height="840"
         MinWidth="820" MinHeight="560"
-        Background="{StaticResource PageBrush}"
-        Foreground="{StaticResource TextPrimaryBrush}"
+        Background="{DynamicResource PageBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
         FontFamily="Segoe UI"
         FontSize="13"
         UseLayoutRounding="True"
@@ -44,9 +44,9 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Text="CPU" Style="{StaticResource MeterLabel}" />
-                    <TextBlock Text="{Binding Cpu.Value}" Style="{StaticResource MeterLabel}" HorizontalAlignment="Right" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding Cpu.Value}" Style="{StaticResource MeterLabel}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <charts:UsageBar Grid.Row="1" Margin="0,5,0,0" Fraction="{Binding Cpu.Fraction}"
-                                     Fill="{StaticResource CpuBrush}" Track="{StaticResource CpuTrackBrush}" />
+                                     Fill="{DynamicResource CpuBrush}" Track="{DynamicResource CpuTrackBrush}" />
                 </Grid>
 
                 <Grid Margin="0,0,0,12">
@@ -55,9 +55,9 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Text="Arbeitsspeicher" Style="{StaticResource MeterLabel}" />
-                    <TextBlock Text="{Binding Memory.Value}" Style="{StaticResource MeterLabel}" HorizontalAlignment="Right" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding Memory.Value}" Style="{StaticResource MeterLabel}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <charts:UsageBar Grid.Row="1" Margin="0,5,0,0" Fraction="{Binding Memory.Fraction}"
-                                     Fill="{StaticResource MemoryBrush}" Track="{StaticResource MemoryTrackBrush}" />
+                                     Fill="{DynamicResource MemoryBrush}" Track="{DynamicResource MemoryTrackBrush}" />
                 </Grid>
 
                 <Grid Visibility="{Binding Gpu.IsAvailable, Converter={StaticResource BoolToVisibility}}">
@@ -66,9 +66,9 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Text="GPU" Style="{StaticResource MeterLabel}" />
-                    <TextBlock Text="{Binding Gpu.Value}" Style="{StaticResource MeterLabel}" HorizontalAlignment="Right" Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock Text="{Binding Gpu.Value}" Style="{StaticResource MeterLabel}" HorizontalAlignment="Right" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <charts:UsageBar Grid.Row="1" Margin="0,5,0,0" Fraction="{Binding Gpu.Fraction}"
-                                     Fill="{StaticResource GpuBrush}" Track="{StaticResource GpuTrackBrush}" />
+                                     Fill="{DynamicResource GpuBrush}" Track="{DynamicResource GpuTrackBrush}" />
                 </Grid>
             </StackPanel>
 
@@ -94,15 +94,15 @@
         </Grid>
 
         <!-- ═════════ Rückfrage ═════════ -->
-        <Grid x:Name="DialogLayer" Grid.ColumnSpan="2" Background="{StaticResource OverlayBrush}" Visibility="Collapsed"
+        <Grid x:Name="DialogLayer" Grid.ColumnSpan="2" Background="{DynamicResource OverlayBrush}" Visibility="Collapsed"
               MouseLeftButtonDown="DialogLayer_MouseLeftButtonDown">
-            <Border Style="{StaticResource Card}" Background="{StaticResource ElevatedBrush}" BorderBrush="{StaticResource BorderStrongBrush}"
+            <Border Style="{StaticResource Card}" Background="{DynamicResource ElevatedBrush}" BorderBrush="{DynamicResource BorderStrongBrush}"
                     Width="440" Padding="24,22,24,20" HorizontalAlignment="Center" VerticalAlignment="Center"
                     MouseLeftButtonDown="DialogCard_MouseLeftButtonDown">
                 <StackPanel>
                     <TextBlock x:Name="DialogTitle" FontSize="18" FontWeight="SemiBold" />
                     <TextBlock x:Name="DialogMessage" Margin="0,10,0,24" TextWrapping="Wrap" LineHeight="20"
-                               Foreground="{StaticResource TextSecondaryBrush}" />
+                               Foreground="{DynamicResource TextSecondaryBrush}" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button x:Name="DialogCancel" Content="Abbrechen" MinWidth="96" Click="DialogCancel_Click" />
                         <Button x:Name="DialogConfirm" Style="{StaticResource DangerButton}" MinWidth="96" Margin="8,0,0,0" Click="DialogConfirm_Click" />
@@ -114,17 +114,17 @@
         <!-- ═════════ Hinweis ═════════ -->
         <Border x:Name="Toast" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,28"
                 MaxWidth="600" Padding="16,11" CornerRadius="10" BorderThickness="1"
-                Background="{StaticResource ElevatedBrush}" BorderBrush="{StaticResource BorderStrongBrush}"
+                Background="{DynamicResource ElevatedBrush}" BorderBrush="{DynamicResource BorderStrongBrush}"
                 Opacity="0" Visibility="Collapsed" IsHitTestVisible="False">
             <Border.Effect>
-                <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.45" Color="Black" />
+                <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.3" Color="Black" />
             </Border.Effect>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource Glyph}" Text="&#xE946;" FontSize="15" Foreground="{StaticResource AccentBrush}"
+                <TextBlock Style="{StaticResource Glyph}" Text="&#xE946;" FontSize="15" Foreground="{DynamicResource AccentBrush}"
                            Margin="0,0,11,0" VerticalAlignment="Top" />
                 <TextBlock x:Name="ToastText" Grid.Column="1" TextWrapping="Wrap" />
             </Grid>

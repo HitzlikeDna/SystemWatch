@@ -20,6 +20,7 @@ public sealed class AppSettings
     public bool ShowWindowsProcesses { get; set; }
     public bool GroupProcesses { get; set; } = true;
     public string NetworkAdapterId { get; set; } = "";
+    public AppTheme Theme { get; set; } = AppTheme.Dark;
 
     public double? WindowLeft { get; set; }
     public double? WindowTop { get; set; }
@@ -43,6 +44,9 @@ public sealed class AppSettings
             settings.ShowWindowsProcesses = ReadBool(key, "ShowWindowsProcesses", settings.ShowWindowsProcesses);
             settings.GroupProcesses = ReadBool(key, "GroupProcesses", settings.GroupProcesses);
             settings.NetworkAdapterId = key.GetValue("NetworkAdapterId") as string ?? "";
+            if (Enum.TryParse(key.GetValue("Theme") as string, ignoreCase: true, out AppTheme theme) &&
+                Enum.IsDefined(typeof(AppTheme), theme))
+                settings.Theme = theme;
 
             settings.WindowLeft = ReadDouble(key, "Left");
             settings.WindowTop = ReadDouble(key, "Top");
@@ -70,6 +74,7 @@ public sealed class AppSettings
             key.SetValue("ShowWindowsProcesses", ShowWindowsProcesses ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue("GroupProcesses", GroupProcesses ? 1 : 0, RegistryValueKind.DWord);
             key.SetValue("NetworkAdapterId", NetworkAdapterId ?? "");
+            key.SetValue("Theme", Theme.ToString());
 
             WriteDouble(key, "Left", WindowLeft);
             WriteDouble(key, "Top", WindowTop);

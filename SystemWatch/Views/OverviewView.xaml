@@ -33,17 +33,17 @@
                       Focusable="False">
             <UniformGrid x:Name="CardGrid" Columns="3" VerticalAlignment="Top">
 
-                <views:MetricCard DataContext="{Binding Cpu}" Margin="6" Accent="{StaticResource CpuColor}" Maximum="100" />
+                <views:MetricCard DataContext="{Binding Cpu}" Margin="6" Accent="{DynamicResource CpuColor}" Maximum="100" />
 
-                <views:MetricCard DataContext="{Binding Memory}" Margin="6" Accent="{StaticResource MemoryColor}" Maximum="100" />
+                <views:MetricCard DataContext="{Binding Memory}" Margin="6" Accent="{DynamicResource MemoryColor}" Maximum="100" />
 
-                <views:MetricCard DataContext="{Binding Gpu}" Margin="6" Accent="{StaticResource GpuColor}" Maximum="100" />
+                <views:MetricCard DataContext="{Binding Gpu}" Margin="6" Accent="{DynamicResource GpuColor}" Maximum="100" />
 
-                <views:MetricCard DataContext="{Binding Network}" Margin="6" Accent="{StaticResource NetworkColor}"
+                <views:MetricCard DataContext="{Binding Network}" Margin="6" Accent="{DynamicResource NetworkColor}"
                                   Unit="BytesPerSecond" MinimumScale="102400"
                                   PrimaryLabel="Empfangen" SecondaryLabel="Gesendet" />
 
-                <views:MetricCard DataContext="{Binding Disk}" Margin="6" Accent="{StaticResource DiskColor}"
+                <views:MetricCard DataContext="{Binding Disk}" Margin="6" Accent="{DynamicResource DiskColor}"
                                   Unit="BytesPerSecond" MinimumScale="1048576"
                                   PrimaryLabel="Lesen" SecondaryLabel="Schreiben">
                     <views:MetricCard.ExtraContent>
@@ -75,7 +75,7 @@
                                         <TextBlock Text="{Binding Name}" Style="{StaticResource StatValue}" Margin="0" VerticalAlignment="Center" />
                                         <charts:UsageBar Grid.Column="1" VerticalAlignment="Center" Margin="0,1,0,0"
                                                          Fraction="{Binding Fraction}"
-                                                         Fill="{StaticResource DiskBrush}" Track="{StaticResource DiskTrackBrush}" />
+                                                         Fill="{DynamicResource DiskBrush}" Track="{DynamicResource DiskTrackBrush}" />
                                         <TextBlock Grid.Column="2" Text="{Binding Usage}" Style="{StaticResource Caption}"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center" />
                                     </Grid>
@@ -94,7 +94,7 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Ellipse Width="8" Height="8" Margin="0,1,9,0" VerticalAlignment="Center" Fill="{StaticResource TextMutedBrush}" />
+                            <Ellipse Width="8" Height="8" Margin="0,1,9,0" VerticalAlignment="Center" Fill="{DynamicResource TextMutedBrush}" />
                             <TextBlock Grid.Column="1" Text="Top-Prozesse" Style="{StaticResource CardTitle}" />
                             <Button Grid.Column="2" Style="{StaticResource LinkButton}" Content="Alle Prozesse"
                                     Command="{Binding NavigateCommand}" CommandParameter="Processes" />
@@ -118,7 +118,7 @@
                                         </Grid.RowDefinitions>
 
                                         <Grid Width="18" Height="18" HorizontalAlignment="Left">
-                                            <Border CornerRadius="4" Background="{StaticResource ControlHoverBrush}"
+                                            <Border CornerRadius="4" Background="{DynamicResource ControlHoverBrush}"
                                                     Visibility="{Binding Icon, Converter={StaticResource InverseBoolToVisibility}}" />
                                             <Image Source="{Binding Icon}" RenderOptions.BitmapScalingMode="HighQuality" />
                                         </Grid>
@@ -130,7 +130,7 @@
 
                                         <charts:UsageBar Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Height="3" Margin="0,5,0,0"
                                                          Fraction="{Binding Fraction}"
-                                                         Fill="{StaticResource CpuBrush}" Track="{StaticResource CpuTrackBrush}" />
+                                                         Fill="{DynamicResource CpuBrush}" Track="{DynamicResource CpuTrackBrush}" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

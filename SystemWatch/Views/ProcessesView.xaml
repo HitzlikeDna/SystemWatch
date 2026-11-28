@@ -87,9 +87,9 @@
                                             <ControlTemplate TargetType="GroupItem">
                                                 <StackPanel>
                                                     <TextBlock Margin="14,16,0,6" FontSize="12" FontWeight="SemiBold"
-                                                               Foreground="{StaticResource TextSecondaryBrush}">
+                                                               Foreground="{DynamicResource TextSecondaryBrush}">
                                                         <Run Text="{Binding Name, Mode=OneWay}" />
-                                                        <Run Text="{Binding ItemCount, Mode=OneWay}" Foreground="{StaticResource TextMutedBrush}" />
+                                                        <Run Text="{Binding ItemCount, Mode=OneWay}" Foreground="{DynamicResource TextMutedBrush}" />
                                                     </TextBlock>
                                                     <ItemsPresenter />
                                                 </StackPanel>
@@ -107,7 +107,7 @@
                                 <DataTemplate DataType="{x:Type vm:ProcessRowViewModel}">
                                     <StackPanel Orientation="Horizontal" ToolTip="{Binding ImagePath}" ToolTipService.InitialShowDelay="900">
                                         <Grid Width="18" Height="18" Margin="0,0,12,0">
-                                            <Border CornerRadius="4" Background="{StaticResource ControlHoverBrush}"
+                                            <Border CornerRadius="4" Background="{DynamicResource ControlHoverBrush}"
                                                     Visibility="{Binding Icon, Converter={StaticResource InverseBoolToVisibility}}" />
                                             <Image Source="{Binding Icon}" RenderOptions.BitmapScalingMode="HighQuality" />
                                         </Grid>
@@ -122,7 +122,7 @@
                                             HeaderStyle="{StaticResource GridHeaderRight}" ElementStyle="{StaticResource GridNumberText}">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell" BasedOn="{StaticResource GridCell}">
-                                    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
                                 </Style>
                             </DataGridTextColumn.CellStyle>
                         </DataGridTextColumn>
@@ -131,7 +131,7 @@
                                             HeaderStyle="{StaticResource GridHeaderRight}" ElementStyle="{StaticResource GridNumberText}">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell" BasedOn="{StaticResource GridCell}">
-                                    <Setter Property="Background" Value="{Binding CpuHeat, Converter={StaticResource HeatBrush}, ConverterParameter=#3987E5}" />
+                                    <Setter Property="Background" Value="{Binding CpuHeat, Converter={StaticResource HeatBrush}, ConverterParameter=CpuColor}" />
                                 </Style>
                             </DataGridTextColumn.CellStyle>
                         </DataGridTextColumn>
@@ -140,7 +140,7 @@
                                             HeaderStyle="{StaticResource GridHeaderRight}" ElementStyle="{StaticResource GridNumberText}">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell" BasedOn="{StaticResource GridCell}">
-                                    <Setter Property="Background" Value="{Binding MemoryHeat, Converter={StaticResource HeatBrush}, ConverterParameter=#9085E9}" />
+                                    <Setter Property="Background" Value="{Binding MemoryHeat, Converter={StaticResource HeatBrush}, ConverterParameter=MemoryColor}" />
                                 </Style>
                             </DataGridTextColumn.CellStyle>
                         </DataGridTextColumn>
@@ -149,7 +149,7 @@
                                             HeaderStyle="{StaticResource GridHeaderRight}" ElementStyle="{StaticResource GridNumberText}">
                             <DataGridTextColumn.CellStyle>
                                 <Style TargetType="DataGridCell" BasedOn="{StaticResource GridCell}">
-                                    <Setter Property="Background" Value="{Binding GpuHeat, Converter={StaticResource HeatBrush}, ConverterParameter=#199E70}" />
+                                    <Setter Property="Background" Value="{Binding GpuHeat, Converter={StaticResource HeatBrush}, ConverterParameter=GpuColor}" />
                                 </Style>
                             </DataGridTextColumn.CellStyle>
                         </DataGridTextColumn>

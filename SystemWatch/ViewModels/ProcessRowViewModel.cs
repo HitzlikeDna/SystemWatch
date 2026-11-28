@@ -110,6 +110,14 @@ public sealed class ProcessRowViewModel(string key) : ObservableObject
         private set => Set(ref _cpuText, value);
     }
 
+    /// <summary>Hinterlegungen neu zeichnen lassen (nach einem Designwechsel).</summary>
+    internal void RefreshHeat()
+    {
+        OnPropertyChanged(nameof(CpuHeat));
+        OnPropertyChanged(nameof(MemoryHeat));
+        OnPropertyChanged(nameof(GpuHeat));
+    }
+
     public double CpuHeat
     {
         get => _cpuHeat;

@@ -65,6 +65,13 @@ public sealed class ProcessListViewModel : ObservableObject
 
         ApplySortDescriptions();
 
+        // Die Hinterlegungsfarben hängen vom Design ab.
+        ThemeManager.Changed += (_, _) =>
+        {
+            foreach (var row in _rows)
+                row.RefreshHeat();
+        };
+
         KillCommand = new RelayCommand(() => _ = KillSelectedAsync(), () => SelectedRow != null);
         OpenLocationCommand = new RelayCommand(OpenLocation, () => SelectedRow?.ImagePath != null);
     }

@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using SystemWatch.Charts;
+using SystemWatch.Infrastructure;
 
 namespace SystemWatch.Views;
 
@@ -42,7 +43,17 @@ public partial class MetricCard : UserControl
     {
         InitializeComponent();
         UpdateBrushes();
+
+        // Die zweite Linie wird je nach Design heller oder dunkler – auch wenn die Akzentfarbe gleich bleibt.
+        Loaded += (_, _) =>
+        {
+            ThemeManager.Changed += OnThemeChanged;
+            UpdateBrushes();
+        };
+        Unloaded += (_, _) => ThemeManager.Changed -= OnThemeChanged;
     }
+
+    private void OnThemeChanged(object? sender, System.EventArgs e) => UpdateBrushes();
 
     public Color Accent
     {
@@ -52,7 +63,7 @@ public partial class MetricCard : UserControl
 
     public Brush AccentBrush => (Brush)GetValue(AccentBrushProperty);
 
-    /// <summary>Hellere Variante für die zweite Linie – passt zur Darstellung im Graphen.</summary>
+    /// <summary>Abgestufte Variante für die zweite Linie – passt zur Darstellung im Graphen.</summary>
     public Brush SecondaryAccentBrush => (Brush)GetValue(SecondaryAccentBrushProperty);
 
     public GraphUnit Unit
@@ -97,10 +108,7 @@ public partial class MetricCard : UserControl
     private void UpdateBrushes()
     {
         var color = Accent;
-        var light = Color.FromRgb(
-            (byte)(color.R + (255 - color.R) * 0.45),
-            (byte)(color.G + (255 - color.G) * 0.45),
-            (byte)(color.B + (255 - color.B) * 0.45));
+        var light = ThemeManager.SecondaryOf(color);
 
         var accent = new SolidColorBrush(color);
         accent.Freeze();

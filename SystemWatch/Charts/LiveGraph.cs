@@ -39,14 +39,23 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
     private static readonly Typeface LabelTypeface = new(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
     private static readonly Typeface ValueTypeface = new(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
 
-    private static readonly Brush MutedBrush = Frozen(Color.FromRgb(0x89, 0x87, 0x81));
-    private static readonly Brush PrimaryTextBrush = Frozen(Color.FromRgb(0xF0, 0xEF, 0xEC));
-    private static readonly Brush SurfaceBrush = Frozen(Color.FromRgb(0x1A, 0x1A, 0x19));
-    private static readonly Brush TooltipBrush = Frozen(Color.FromRgb(0x26, 0x26, 0x24));
-    private static readonly Pen TooltipBorderPen = FrozenPen(Frozen(Color.FromRgb(0x3A, 0x3A, 0x37)), 1);
-    private static readonly Color GridColor = Color.FromRgb(0x2C, 0x2C, 0x2A);
-    private static readonly Color BaselineColor = Color.FromRgb(0x38, 0x38, 0x35);
-    private static readonly Color CrosshairColor = Color.FromArgb(0x80, 0x89, 0x87, 0x81);
+    // Farben des aktiven Designs (Themes/Dark.xaml bzw. Light.xaml), beim Designwechsel neu geladen.
+    private static ChartColors _colors = ChartColors.Load();
+    private static int _colorsVersion = ThemeManager.Version;
+
+    private static ChartColors Palette
+    {
+        get
+        {
+            if (_colorsVersion != ThemeManager.Version)
+            {
+                _colors = ChartColors.Load();
+                _colorsVersion = ThemeManager.Version;
+            }
+
+            return _colors;
+        }
+    }
 
     // ───────────── Abhängigkeitseigenschaften ─────────────
 
@@ -178,12 +187,15 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
         Loaded += (_, _) =>
         {
             FrameClock.EnabledChanged += OnClockEnabledChanged;
+            ThemeManager.Changed += OnThemeChanged;
+            UpdateBrushes();
             UpdateRegistration();
             Invalidate();
         };
         Unloaded += (_, _) =>
         {
             FrameClock.EnabledChanged -= OnClockEnabledChanged;
+            ThemeManager.Changed -= OnThemeChanged;
             UpdateRegistration();
         };
         IsVisibleChanged += (_, _) =>
@@ -307,6 +319,12 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
             Update(Stopwatch.GetTimestamp());
     }
 
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        UpdateBrushes();
+        Invalidate();
+    }
+
     private void UpdateRegistration()
     {
         bool wanted = IsLoaded && IsVisible && FrameClock.Enabled;
@@ -325,7 +343,7 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
     {
         var color = Color;
         _lineBrush = Frozen(color);
-        _secondaryBrush = Frozen(Blend(color, Colors.White, 0.45));
+        _secondaryBrush = Frozen(ThemeManager.SecondaryOf(color));
         _linePen = FrozenPen(_lineBrush, 2);
         _secondaryPen = FrozenPen(_secondaryBrush, 1.5);
         _fillBrush = null;
@@ -401,9 +419,10 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
             _curvesDirty = true;
 
             double hairline = 1 / _dpiScale;
-            _gridPen = FrozenPen(Frozen(GridColor), hairline);
-            _baselinePen = FrozenPen(Frozen(BaselineColor), hairline);
-            _crosshairPen = FrozenPen(Frozen(CrosshairColor), hairline);
+            var palette = Palette;
+            _gridPen = FrozenPen(palette.Grid, hairline);
+            _baselinePen = FrozenPen(palette.Baseline, hairline);
+            _crosshairPen = FrozenPen(palette.Crosshair, hairline);
 
             var clip = new RectangleGeometry(new Rect(0, plot.Top - 3, plot.Right, plot.Height + 3 + devicePixel));
             clip.Freeze();
@@ -429,7 +448,7 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
         double baseline = Snap(_plot.Bottom);
         dc.DrawLine(_baselinePen, new Point(0, baseline), new Point(width, baseline));
 
-        var label = CreateText(FormatValue(_targetMax), MutedBrush, 11, LabelTypeface);
+        var label = CreateText(FormatValue(_targetMax), Palette.Muted, 11, LabelTypeface);
         dc.DrawText(label, new Point(0, (LabelBand - label.Height) / 2 - 1));
     }
 
@@ -504,10 +523,10 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
         // Tooltip: Wert(e) und Zeitpunkt
         int lines = secondaryValue.HasValue ? 3 : 2;
         var texts = new FormattedText[lines];
-        texts[0] = CreateText(Describe(PrimaryLabel, primaryValue), PrimaryTextBrush, 12, ValueTypeface);
+        texts[0] = CreateText(Describe(PrimaryLabel, primaryValue), Palette.PrimaryText, 12, ValueTypeface);
         if (secondaryValue is { } second)
-            texts[1] = CreateText(Describe(SecondaryLabel, second), PrimaryTextBrush, 12, ValueTypeface);
-        texts[lines - 1] = CreateText(Format.Ago(age * primary.IntervalSeconds), MutedBrush, 11, LabelTypeface);
+            texts[1] = CreateText(Describe(SecondaryLabel, second), Palette.PrimaryText, 12, ValueTypeface);
+        texts[lines - 1] = CreateText(Format.Ago(age * primary.IntervalSeconds), Palette.Muted, 11, LabelTypeface);
 
         bool keyed = secondaryValue.HasValue;
         double keyWidth = keyed ? 14 : 0;
@@ -527,7 +546,7 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
         boxX = Math.Max(0, boxX);
 
         var box = new Rect(Math.Round(boxX), Math.Round(_plot.Top + 4), Math.Ceiling(boxWidth), Math.Ceiling(boxHeight));
-        dc.DrawRoundedRectangle(TooltipBrush, TooltipBorderPen, box, 6, 6);
+        dc.DrawRoundedRectangle(Palette.Tooltip, Palette.TooltipBorder, box, 6, 6);
 
         double y = box.Y + padY;
         for (int i = 0; i < texts.Length; i++)
@@ -552,7 +571,7 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
 
     private static void DrawDot(DrawingContext dc, Point center, Brush brush, double radius)
     {
-        dc.DrawEllipse(SurfaceBrush, null, center, radius + 2, radius + 2);
+        dc.DrawEllipse(Palette.Surface, null, center, radius + 2, radius + 2);
         dc.DrawEllipse(brush, null, center, radius, radius);
     }
 
@@ -646,11 +665,6 @@ public sealed class LiveGraph : FrameworkElement, IFrameTarget
 
     /// <summary>Rastet eine 1-Pixel-Linie auf ein Gerätepixel ein, damit sie scharf bleibt.</summary>
     private double Snap(double value) => (Math.Floor(value * _dpiScale) + 0.5) / _dpiScale;
-
-    private static Color Blend(Color a, Color b, double amount) => Color.FromRgb(
-        (byte)(a.R + (b.R - a.R) * amount),
-        (byte)(a.G + (b.G - a.G) * amount),
-        (byte)(a.B + (b.B - a.B) * amount));
 
     private static SolidColorBrush Frozen(Color color)
     {
