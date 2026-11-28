@@ -1,0 +1,86 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Farbsystem „Hell“. Gleiche Schlüssel wie Dark.xaml.
+        Die Kennzahlfarben sind dieselben Farbtöne wie im dunklen Design, nur für die helle
+        Fläche abgestuft (geprüft: Farbsehschwäche-Abstand, alle ≥ 3:1 Kontrast zur Kartenfläche).
+        Nebentext ist dunkler als im Palettenvorschlag, damit er auch klein ≥ 4,5:1 erreicht.
+    -->
+
+    <!-- Flächen -->
+    <Color x:Key="PageColor">#FFF0F0ED</Color>
+    <Color x:Key="SurfaceColor">#FFFCFCFB</Color>
+    <Color x:Key="ElevatedColor">#FFFFFFFF</Color>
+    <Color x:Key="ControlColor">#FFEEEDEA</Color>
+    <Color x:Key="ControlHoverColor">#FFE5E4E0</Color>
+    <Color x:Key="ControlPressedColor">#FFDCDBD6</Color>
+    <Color x:Key="BorderColor">#1A0B0B0B</Color>
+    <Color x:Key="BorderStrongColor">#2E0B0B0B</Color>
+    <Color x:Key="WindowBorderColor">#FFD6D5CF</Color>
+
+    <!-- Text -->
+    <Color x:Key="TextPrimaryColor">#FF0B0B0B</Color>
+    <Color x:Key="TextSecondaryColor">#FF52514E</Color>
+    <Color x:Key="TextMutedColor">#FF6E6C67</Color>
+
+    <!-- Interaktion -->
+    <Color x:Key="AccentColor">#FF2A78D6</Color>
+    <Color x:Key="AccentHoverColor">#FF2369C0</Color>
+    <Color x:Key="DangerColor">#FFD03B3B</Color>
+    <Color x:Key="DangerHoverColor">#FFB93131</Color>
+    <Color x:Key="WarningColor">#FF9A6400</Color>
+
+    <!-- Kennzahlen -->
+    <Color x:Key="CpuColor">#FF2A78D6</Color>
+    <Color x:Key="MemoryColor">#FF4A3AA7</Color>
+    <Color x:Key="GpuColor">#FF199E70</Color>
+    <Color x:Key="NetworkColor">#FFEB6834</Color>
+    <Color x:Key="DiskColor">#FFD55181</Color>
+
+    <!-- Graphen -->
+    <Color x:Key="ChartGridColor">#FFE1E0D9</Color>
+    <Color x:Key="ChartBaselineColor">#FFC3C2B7</Color>
+    <Color x:Key="ChartTooltipColor">#FFFFFFFF</Color>
+    <Color x:Key="ChartTooltipBorderColor">#FFD6D5CF</Color>
+
+    <SolidColorBrush x:Key="PageBrush" Color="{StaticResource PageColor}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
+    <SolidColorBrush x:Key="ElevatedBrush" Color="{StaticResource ElevatedColor}" />
+    <SolidColorBrush x:Key="ControlBrush" Color="{StaticResource ControlColor}" />
+    <SolidColorBrush x:Key="ControlHoverBrush" Color="{StaticResource ControlHoverColor}" />
+    <SolidColorBrush x:Key="ControlPressedBrush" Color="{StaticResource ControlPressedColor}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="{StaticResource BorderStrongColor}" />
+    <SolidColorBrush x:Key="HoverBrush" Color="#0A000000" />
+    <SolidColorBrush x:Key="SelectedBrush" Color="#14000000" />
+    <SolidColorBrush x:Key="SelectionBrush" Color="#2E2A78D6" />
+    <SolidColorBrush x:Key="OverlayBrush" Color="#59000000" />
+    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#33000000" />
+    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#52000000" />
+    <SolidColorBrush x:Key="ScrollThumbPressedBrush" Color="#70000000" />
+
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMutedColor}" />
+
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="#1F2A78D6" />
+    <SolidColorBrush x:Key="AccentBorderBrush" Color="#802A78D6" />
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+    <SolidColorBrush x:Key="DangerHoverBrush" Color="{StaticResource DangerHoverColor}" />
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
+
+    <SolidColorBrush x:Key="CpuBrush" Color="{StaticResource CpuColor}" />
+    <SolidColorBrush x:Key="MemoryBrush" Color="{StaticResource MemoryColor}" />
+    <SolidColorBrush x:Key="GpuBrush" Color="{StaticResource GpuColor}" />
+    <SolidColorBrush x:Key="NetworkBrush" Color="{StaticResource NetworkColor}" />
+    <SolidColorBrush x:Key="DiskBrush" Color="{StaticResource DiskColor}" />
+
+    <SolidColorBrush x:Key="CpuTrackBrush" Color="{StaticResource CpuColor}" Opacity="0.2" />
+    <SolidColorBrush x:Key="MemoryTrackBrush" Color="{StaticResource MemoryColor}" Opacity="0.2" />
+    <SolidColorBrush x:Key="GpuTrackBrush" Color="{StaticResource GpuColor}" Opacity="0.2" />
+    <SolidColorBrush x:Key="DiskTrackBrush" Color="{StaticResource DiskColor}" Opacity="0.2" />
+
+</ResourceDictionary>

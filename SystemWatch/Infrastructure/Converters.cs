@@ -61,21 +61,25 @@ public sealed class BoolToVisibilityConverter : IValueConverter
 
 /// <summary>
 /// Hinterlegt Tabellenwerte mit einer Farbe, deren Deckkraft mit dem Wert steigt (0…1).
-/// Parameter: Farbe als Hex (#RRGGBB). Pinsel werden in 24 Stufen zwischengespeichert.
+/// Parameter: Ressourcenschlüssel der Farbe (z. B. "CpuColor") oder Hex (#RRGGBB) –
+/// der Schlüssel folgt dem aktiven Design. Pinsel werden in 24 Stufen zwischengespeichert.
 /// </summary>
 public sealed class HeatBrushConverter : IValueConverter
 {
     private const int Levels = 24;
-    private static readonly Dictionary<string, Brush[]> Cache = new();
+    private static readonly Dictionary<Color, Brush[]> Cache = new();
 
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is not double heat || heat <= 0.001 || parameter is not string hex)
+        if (value is not double heat || heat <= 0.001 || parameter is not string key)
             return Brushes.Transparent;
 
-        if (!Cache.TryGetValue(hex, out var brushes))
+        var color = key.StartsWith("#", StringComparison.Ordinal)
+            ? (Color)ColorConverter.ConvertFromString(key)
+            : ThemeManager.GetColor(key, Colors.SteelBlue);
+
+        if (!Cache.TryGetValue(color, out var brushes))
         {
-            var color = (Color)ColorConverter.ConvertFromString(hex);
             brushes = new Brush[Levels + 1];
             for (int i = 0; i <= Levels; i++)
             {
@@ -86,7 +90,7 @@ public sealed class HeatBrushConverter : IValueConverter
                 brushes[i] = brush;
             }
 
-            Cache[hex] = brushes;
+            Cache[color] = brushes;
         }
 
         int level = (int)Math.Round(Math.Min(1, heat) * Levels);

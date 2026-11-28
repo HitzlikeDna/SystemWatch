@@ -2,10 +2,13 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Farbsystem (dunkel). Flächen sind neutral-warmes Grau, Text in drei Abstufungen.
+        Farbsystem „Dunkel“ (Standard). Flächen sind neutral-warmes Grau, Text in drei Abstufungen.
         Jede Kennzahl hat eine feste Erkennungsfarbe, die überall gleich bleibt
         (Kachel, Graph, Seitenleiste, Tabelle). Die Akzentfarben stammen aus einer auf
         Farbsehschwäche geprüften Palette und erreichen ≥ 3:1 Kontrast zur Kartenfläche.
+
+        Light.xaml enthält dieselben Schlüssel. Verwendet werden sie ausschließlich per
+        DynamicResource, damit das Design zur Laufzeit umgeschaltet werden kann.
     -->
 
     <!-- Flächen -->
@@ -17,6 +20,7 @@
     <Color x:Key="ControlPressedColor">#FF222221</Color>
     <Color x:Key="BorderColor">#14FFFFFF</Color>
     <Color x:Key="BorderStrongColor">#29FFFFFF</Color>
+    <Color x:Key="WindowBorderColor">#FF2C2C2A</Color>
 
     <!-- Text -->
     <Color x:Key="TextPrimaryColor">#FFF0EFEC</Color>
@@ -28,6 +32,7 @@
     <Color x:Key="AccentHoverColor">#FF4B94EA</Color>
     <Color x:Key="DangerColor">#FFD03B3B</Color>
     <Color x:Key="DangerHoverColor">#FFDC4E4E</Color>
+    <Color x:Key="WarningColor">#FFFAB219</Color>
 
     <!-- Kennzahlen -->
     <Color x:Key="CpuColor">#FF3987E5</Color>
@@ -35,6 +40,12 @@
     <Color x:Key="GpuColor">#FF199E70</Color>
     <Color x:Key="NetworkColor">#FFD95926</Color>
     <Color x:Key="DiskColor">#FFD55181</Color>
+
+    <!-- Graphen -->
+    <Color x:Key="ChartGridColor">#FF2C2C2A</Color>
+    <Color x:Key="ChartBaselineColor">#FF383835</Color>
+    <Color x:Key="ChartTooltipColor">#FF262624</Color>
+    <Color x:Key="ChartTooltipBorderColor">#FF3A3A37</Color>
 
     <SolidColorBrush x:Key="PageBrush" Color="{StaticResource PageColor}" />
     <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
@@ -48,6 +59,9 @@
     <SolidColorBrush x:Key="SelectedBrush" Color="#17FFFFFF" />
     <SolidColorBrush x:Key="SelectionBrush" Color="#333987E5" />
     <SolidColorBrush x:Key="OverlayBrush" Color="#B3000000" />
+    <SolidColorBrush x:Key="ScrollThumbBrush" Color="#40FFFFFF" />
+    <SolidColorBrush x:Key="ScrollThumbHoverBrush" Color="#66FFFFFF" />
+    <SolidColorBrush x:Key="ScrollThumbPressedBrush" Color="#80FFFFFF" />
 
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
@@ -56,8 +70,10 @@
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
     <SolidColorBrush x:Key="AccentHoverBrush" Color="{StaticResource AccentHoverColor}" />
     <SolidColorBrush x:Key="AccentSoftBrush" Color="#263987E5" />
+    <SolidColorBrush x:Key="AccentBorderBrush" Color="#803987E5" />
     <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
     <SolidColorBrush x:Key="DangerHoverBrush" Color="{StaticResource DangerHoverColor}" />
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}" />
 
     <SolidColorBrush x:Key="CpuBrush" Color="{StaticResource CpuColor}" />
     <SolidColorBrush x:Key="MemoryBrush" Color="{StaticResource MemoryColor}" />
@@ -70,7 +86,5 @@
     <SolidColorBrush x:Key="MemoryTrackBrush" Color="{StaticResource MemoryColor}" Opacity="0.2" />
     <SolidColorBrush x:Key="GpuTrackBrush" Color="{StaticResource GpuColor}" Opacity="0.2" />
     <SolidColorBrush x:Key="DiskTrackBrush" Color="{StaticResource DiskColor}" Opacity="0.2" />
-
-    <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
 </ResourceDictionary>

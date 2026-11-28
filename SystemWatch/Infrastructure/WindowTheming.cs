@@ -6,14 +6,21 @@ using SystemWatch.Native;
 
 namespace SystemWatch.Infrastructure;
 
-/// <summary>Färbt die Windows-Titelleiste passend zum dunklen Design ein.</summary>
+/// <summary>Färbt die Windows-Titelleiste passend zum aktiven Design ein.</summary>
 internal static class WindowTheming
 {
-    public static void ApplyDarkTitleBar(Window window, Color caption, Color text, Color border)
+    /// <summary>Übernimmt Seiten-, Text- und Rahmenfarbe des aktiven Designs.</summary>
+    public static void ApplyTitleBar(Window window) => ApplyTitleBar(window,
+        dark: !ThemeManager.IsLight,
+        caption: ThemeManager.GetColor("PageColor", Color.FromRgb(0x10, 0x10, 0x10)),
+        text: ThemeManager.GetColor("TextPrimaryColor", Color.FromRgb(0xF0, 0xEF, 0xEC)),
+        border: ThemeManager.GetColor("WindowBorderColor", Color.FromRgb(0x2C, 0x2C, 0x2A)));
+
+    public static void ApplyTitleBar(Window window, bool dark, Color caption, Color text, Color border)
     {
         IntPtr hwnd = new WindowInteropHelper(window).EnsureHandle();
 
-        int enabled = 1;
+        int enabled = dark ? 1 : 0;
         if (NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DwmwaUseImmersiveDarkMode, ref enabled, sizeof(int)) != 0)
             NativeMethods.DwmSetWindowAttribute(hwnd, NativeMethods.DwmwaUseImmersiveDarkModeBefore20H1, ref enabled, sizeof(int));
 

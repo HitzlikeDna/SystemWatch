@@ -138,6 +138,26 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     public static extern bool DestroyIcon(IntPtr icon);
 
+    public static readonly IntPtr HwndBroadcast = new(0xFFFF);
+    public const int AsfwAny = -1;
+    public const uint MsgfltAllow = 1;
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegisterWindowMessageW", SetLastError = true)]
+    public static extern uint RegisterWindowMessage(string message);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool PostMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern bool AllowSetForegroundWindow(int processId);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    /// <summary>Lässt eine Nachricht von Prozessen ohne Adminrechte zu einem erhöhten Fenster durch.</summary>
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern bool ChangeWindowMessageFilterEx(IntPtr hWnd, uint msg, uint action, IntPtr changeInfo);
+
     // ───────────── shell32 ─────────────
 
     [DllImport("shell32.dll", CharSet = CharSet.Unicode, EntryPoint = "ExtractIconExW")]

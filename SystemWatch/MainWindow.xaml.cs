@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
+using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using SystemWatch.Charts;
@@ -21,10 +21,11 @@ public partial class MainWindow : Window, IUserInteraction
     private readonly MainViewModel _viewModel;
     private readonly DispatcherTimer _toastTimer;
     private TaskCompletionSource<bool>? _dialog;
+    private WindowState _restoreState = WindowState.Normal;
 
-    public MainWindow()
+    public MainWindow(AppSettings settings)
     {
-        _settings = AppSettings.Load();
+        _settings = settings;
         InitializeComponent();
         RestoreWindowBounds();
 
@@ -38,14 +39,59 @@ public partial class MainWindow : Window, IUserInteraction
             WindowState = WindowState.Minimized;
         FrameClock.Paused = WindowState == WindowState.Minimized;
 
-        SourceInitialized += (_, _) => WindowTheming.ApplyDarkTitleBar(this,
-            caption: (Color)FindResource("PageColor"),
-            text: (Color)FindResource("TextPrimaryColor"),
-            border: Color.FromRgb(0x2C, 0x2C, 0x2A));
-        StateChanged += (_, _) => FrameClock.Paused = WindowState == WindowState.Minimized;
+        SourceInitialized += OnSourceInitialized;
+        ThemeManager.Changed += OnThemeChanged;
+        StateChanged += (_, _) =>
+        {
+            FrameClock.Paused = WindowState == WindowState.Minimized;
+            if (WindowState != WindowState.Minimized)
+                _restoreState = WindowState;
+        };
         PreviewKeyDown += OnPreviewKeyDown;
         Closing += OnClosing;
-        Closed += (_, _) => _viewModel.Dispose();
+        Closed += (_, _) =>
+        {
+            ThemeManager.Changed -= OnThemeChanged;
+            _viewModel.Dispose();
+        };
+    }
+
+    private void OnSourceInitialized(object? sender, EventArgs e)
+    {
+        WindowTheming.ApplyTitleBar(this);
+
+        // Ein zweiter Start (Verknüpfung, Strg+Umschalt+Esc) meldet sich per Fensternachricht.
+        // Läuft dieses Fenster mit Adminrechten, muss die Nachricht ausdrücklich zugelassen werden.
+        var source = (HwndSource)PresentationSource.FromVisual(this)!;
+        source.AddHook(WndProc);
+        if (SingleInstance.ActivateMessage != 0)
+            Native.NativeMethods.ChangeWindowMessageFilterEx(source.Handle, SingleInstance.ActivateMessage,
+                Native.NativeMethods.MsgfltAllow, IntPtr.Zero);
+    }
+
+    private void OnThemeChanged(object? sender, EventArgs e) => WindowTheming.ApplyTitleBar(this);
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (SingleInstance.ActivateMessage != 0 && (uint)msg == SingleInstance.ActivateMessage)
+        {
+            BringToFront();
+            handled = true;
+        }
+
+        return IntPtr.Zero;
+    }
+
+    /// <summary>Holt das Fenster nach vorn, auch aus dem minimierten Zustand.</summary>
+    public void BringToFront()
+    {
+        if (WindowState == WindowState.Minimized)
+            WindowState = _restoreState;
+        if (!IsVisible)
+            Show();
+
+        Activate();
+        Native.NativeMethods.SetForegroundWindow(new WindowInteropHelper(this).Handle);
     }
 
     // ───────────── Fensterposition ─────────────
@@ -67,7 +113,10 @@ public partial class MainWindow : Window, IUserInteraction
         }
 
         if (_settings.WindowMaximized)
+        {
             WindowState = WindowState.Maximized;
+            _restoreState = WindowState.Maximized;
+        }
     }
 
     private bool IsOnScreen(double left, double top)
